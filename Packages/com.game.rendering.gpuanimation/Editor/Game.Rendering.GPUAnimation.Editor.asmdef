@@ -1,0 +1,18 @@
+{
+    "name": "Game.Rendering.GPUAnimation.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:78158948d10e64c4fb3dfabf946edf44"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
