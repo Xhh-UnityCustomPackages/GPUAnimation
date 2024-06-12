@@ -2,7 +2,8 @@
     "name": "Game.Rendering.GPUAnimation.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:78158948d10e64c4fb3dfabf946edf44"
+        "GUID:78158948d10e64c4fb3dfabf946edf44",
+        "GUID:478a2357cc57436488a56e564b08d223"
     ],
     "includePlatforms": [
         "Editor"

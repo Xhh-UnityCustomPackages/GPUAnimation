@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Unity.EditorCoroutines.Editor;
 
 namespace Game.GPUSkinning.Editor
 {
@@ -30,8 +31,101 @@ namespace Game.GPUSkinning.Editor
 
         public void Bake()
         {
+            //获取每个动作每一帧的数据
+            var animation = target.AddComponent<Animation>();
+            animation.cullingType = AnimationCullingType.AlwaysAnimate;
+
+            var animator = target.GetComponent<Animator>();
+            var clips = animator.runtimeAnimatorController.animationClips;
+            Debug.LogError($"clips.length:{clips.Length}");
+            for (int i = 0; i < clips.Length; i++)
+            {
+                Debug.LogError(clips[i].name);
+                animation.AddClip(clips[i], clips[i].name);
+                // animation.s(clips[i], clips[i].name);
+            }
 
 
+
+            CreateTextureMatrix(savePath);
+            EditorUtility.SetDirty(animation);
+            AssetDatabase.SaveAssetIfDirty(animation);
+
+
+            // EditorCoroutineUtility.StartCoroutineOwnerless(BakeClip(clip));
+            // Component.DestroyImmediate(animation);
+        }
+
+        private IEnumerator BakeClip(AnimationClip clip)
+        {
+            yield return new WaitForEndOfFrame();
+            samplingFrameIndex = 0;
+
+            var skinningClip = animation.GetGPUSkinningClip(clip.name);
+            var frame = skinningClip.frames[samplingFrameIndex];
+            EditorCoroutineUtility.StartCoroutineOwnerless(SamplingAnimation(frame));
+        }
+
+
+
+        int samplingFrameIndex;
+        // private Vector3 rootMotionPosition;
+        // private Quaternion rootMotionRotation;
+        // private GPUSkinningClip gpuSkinningClip = null;
+        private IEnumerator SamplingAnimation(GPUSkinningFrame frame)
+        {
+            yield return new WaitForEndOfFrame();
+
+            var bones = animation.bones;
+            for (int i = 0; i < bones.Length; ++i)
+            {
+                Transform boneTransform = bones[i].transform;
+                GPUSkinningBone currentBone = GetBoneByTransform(boneTransform);
+                frame.matrices[i] = currentBone.bindpose;
+
+                do
+                {
+                    //层层传递
+                    Matrix4x4 mat = Matrix4x4.TRS(currentBone.transform.localPosition, currentBone.transform.localRotation, currentBone.transform.localScale);
+                    frame.matrices[i] = mat * frame.matrices[i];
+                    if (currentBone.parentBoneIndex == -1)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        currentBone = bones[currentBone.parentBoneIndex];
+                    }
+                }
+                while (true);
+            }
+
+
+            // if (samplingFrameIndex == 0)
+            // {
+            //     rootMotionPosition = bones[animation.rootBoneIndex].transform.localPosition;
+            //     rootMotionRotation = bones[animation.rootBoneIndex].transform.localRotation;
+            // }
+            // else
+            // {
+            //     Vector3 newPosition = bones[animation.rootBoneIndex].transform.localPosition;
+            //     Quaternion newRotation = bones[animation.rootBoneIndex].transform.localRotation;
+            //     Vector3 deltaPosition = newPosition - rootMotionPosition;
+            //     frame.rootMotionDeltaPositionQ = Quaternion.Inverse(Quaternion.Euler(target.transform.forward.normalized)) * Quaternion.Euler(deltaPosition.normalized);
+            //     frame.rootMotionDeltaPositionL = deltaPosition.magnitude;
+            //     frame.rootMotionDeltaRotation = Quaternion.Inverse(rootMotionRotation) * newRotation;
+            //     rootMotionPosition = newPosition;
+            //     rootMotionRotation = newRotation;
+
+            //     if (samplingFrameIndex == 1)
+            //     {
+            //         gpuSkinningClip.frames[0].rootMotionDeltaPositionQ = gpuSkinningClip.frames[1].rootMotionDeltaPositionQ;
+            //         gpuSkinningClip.frames[0].rootMotionDeltaPositionL = gpuSkinningClip.frames[1].rootMotionDeltaPositionL;
+            //         gpuSkinningClip.frames[0].rootMotionDeltaRotation = gpuSkinningClip.frames[1].rootMotionDeltaRotation;
+            //     }
+            // }
+
+            ++samplingFrameIndex;
         }
 
         void InitBones()
@@ -87,10 +181,6 @@ namespace Game.GPUSkinning.Editor
         private void InitClip()
         {
             var animator = target.GetComponent<Animator>();
-            if (animator == null)
-            {
-                return;
-            }
             var animationClips = animator.runtimeAnimatorController.animationClips;
             if (animationClips.Length <= 0)
                 return;

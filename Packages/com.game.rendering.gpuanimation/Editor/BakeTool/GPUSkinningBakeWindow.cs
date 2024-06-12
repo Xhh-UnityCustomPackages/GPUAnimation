@@ -38,6 +38,8 @@ namespace Game.GPUSkinning.Editor
 
             var skinRenderer = target.GetComponentInChildren<SkinnedMeshRenderer>();
             if (skinRenderer == null) return;
+            var animator = target.GetComponent<Animator>();
+            if (animator == null) return;
 
             string assetPath = null;
             if (PrefabUtility.IsAnyPrefabInstanceRoot(target))

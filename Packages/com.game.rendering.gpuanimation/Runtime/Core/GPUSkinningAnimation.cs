@@ -21,5 +21,26 @@ namespace Game.GPUSkinning
 
         public Mesh mesh = null;
 
+
+
+
+        public GPUSkinningClip GetGPUSkinningClip(string name)
+        {
+            if (clips == null || clips.Length == 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < clips.Length; ++i)
+            {
+                if (clips[i].name == name)
+                {
+                    return clips[i];
+                }
+            }
+
+            return null;
+        }
+
     }
 }

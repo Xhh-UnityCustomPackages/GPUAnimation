@@ -8,5 +8,12 @@ namespace Game.GPUSkinning
     public class GPUSkinningFrame
     {
         public Matrix4x4[] matrices = null;
+
+
+
+
+        // public Quaternion rootMotionDeltaPositionQ;
+        // public float rootMotionDeltaPositionL;
+        // public Quaternion rootMotionDeltaRotation;
     }
 }
