@@ -32,38 +32,66 @@ namespace Game.GPUSkinning.Editor
         public void Bake()
         {
             //获取每个动作每一帧的数据
-            var animation = target.AddComponent<Animation>();
-            animation.cullingType = AnimationCullingType.AlwaysAnimate;
 
             var animator = target.GetComponent<Animator>();
+
             var clips = animator.runtimeAnimatorController.animationClips;
             Debug.LogError($"clips.length:{clips.Length}");
-            for (int i = 0; i < clips.Length; i++)
-            {
-                Debug.LogError(clips[i].name);
-                animation.AddClip(clips[i], clips[i].name);
-                // animation.s(clips[i], clips[i].name);
-            }
+
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(BakeAllClip(clips));
 
 
 
             CreateTextureMatrix(savePath);
             EditorUtility.SetDirty(animation);
             AssetDatabase.SaveAssetIfDirty(animation);
+        }
 
+        private IEnumerator BakeAllClip(AnimationClip[] clips)
+        {
+            Debug.LogError($"Bake Start------------");
+            AnimationMode.StartAnimationMode();
 
-            // EditorCoroutineUtility.StartCoroutineOwnerless(BakeClip(clip));
-            // Component.DestroyImmediate(animation);
+            int clipIndex = 0;
+            for (int i = 0; i < clips.Length; i++)
+            {
+                var clip = clips[clipIndex];
+                yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClip(clip));
+                clipIndex++;
+            }
+            AnimationMode.StopAnimationMode();
+            Debug.LogError($"Bake Over------------------");
         }
 
         private IEnumerator BakeClip(AnimationClip clip)
         {
-            yield return new WaitForEndOfFrame();
+            Debug.LogError($"Start Bake Clip:{clip.name}");
             samplingFrameIndex = 0;
 
             var skinningClip = animation.GetGPUSkinningClip(clip.name);
+            yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClipFrame(clip, skinningClip, 0));
+        }
+
+        private IEnumerator BakeClipFrame(AnimationClip clip, GPUSkinningClip skinningClip, float rate)
+        {
+            // 
+
+            int totalFrameCount = skinningClip.totalFrameCount;
+
+            Debug.LogError($"Bake Clip Frame:{clip.name}---{samplingFrameIndex} {totalFrameCount} {rate}");
+            AnimationMode.BeginSampling();
+            AnimationMode.SampleAnimationClip(target, clip, rate);
+            AnimationMode.EndSampling();
+
             var frame = skinningClip.frames[samplingFrameIndex];
-            EditorCoroutineUtility.StartCoroutineOwnerless(SamplingAnimation(frame));
+            yield return EditorCoroutineUtility.StartCoroutineOwnerless(SamplingAnimation(frame));
+
+            if (samplingFrameIndex < totalFrameCount)
+            {
+                float animRate = clip.length / totalFrameCount * samplingFrameIndex;
+                yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClipFrame(clip, skinningClip, animRate));
+            }
         }
 
 
@@ -126,6 +154,8 @@ namespace Game.GPUSkinning.Editor
             // }
 
             ++samplingFrameIndex;
+
+
         }
 
         void InitBones()

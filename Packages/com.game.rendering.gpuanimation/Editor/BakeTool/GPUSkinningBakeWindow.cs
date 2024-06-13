@@ -6,6 +6,7 @@ using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using System.IO;
 using System.Linq;
+using Unity.EditorCoroutines.Editor;
 
 namespace Game.GPUSkinning.Editor
 {
@@ -67,6 +68,13 @@ namespace Game.GPUSkinning.Editor
         {
             m_Baker.Bake();
         }
+
+        [Button]
+        void ExitAnimationMode()
+        {
+            AnimationMode.StopAnimationMode();
+        }
+
 
         string CreateDirectory(string assetPath)
         {

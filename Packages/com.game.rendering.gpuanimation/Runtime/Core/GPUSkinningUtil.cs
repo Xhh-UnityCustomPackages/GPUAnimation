@@ -7,6 +7,23 @@ namespace Game.GPUSkinning
 {
     public class GPUSkinningUtil
     {
+
+        public static Texture2D CreateTexture2D(TextAsset textureRawData, GPUSkinningAnimation anim)
+        {
+            if (textureRawData == null || anim == null)
+            {
+                return null;
+            }
+
+            Texture2D texture = new Texture2D(anim.textureWidth, anim.textureHeight, TextureFormat.RGBAHalf, false, true);
+            texture.name = "GPUSkinningTextureMatrix";
+            texture.filterMode = FilterMode.Point;
+            texture.LoadRawTextureData(textureRawData.bytes);
+            texture.Apply(false, true);
+
+            return texture;
+        }
+
         public static string BoneHierarchyPath(GPUSkinningBone[] bones, int boneIndex)
         {
             if (bones == null || boneIndex < 0 || boneIndex >= bones.Length)

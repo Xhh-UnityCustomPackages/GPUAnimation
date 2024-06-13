@@ -8,7 +8,7 @@ namespace Game.GPUSkinning
     public class GPUSkinningAnimation : ScriptableObject
     {
         public string guid = null;
-        public string name = null;
+        public new string name = null;
         public GPUSkinningBone[] bones = null;
         public int rootBoneIndex = 0;
         public GPUSkinningClip[] clips = null;
@@ -20,6 +20,8 @@ namespace Game.GPUSkinning
 
 
         public Mesh mesh = null;
+        public TextAsset texture = null;
+        public Material material = null;
 
 
 

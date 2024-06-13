@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using UnityEditor;
 
 namespace Game.GPUSkinning.Editor
 {
@@ -79,6 +80,9 @@ namespace Game.GPUSkinning.Editor
                 fileStream.Close();
                 fileStream.Dispose();
             }
+
+            var textureInfo = AssetDatabase.LoadAssetAtPath<TextAsset>(savedPath);
+            animation.texture = textureInfo;
         }
     }
 }
