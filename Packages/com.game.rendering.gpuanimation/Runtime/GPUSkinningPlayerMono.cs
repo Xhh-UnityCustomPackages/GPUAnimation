@@ -15,12 +15,15 @@ namespace Game.GPUSkinning
 
         private GPUSkinningPlayer player = null;
 
+        // public Texture2D tex;
+
         public GPUSkinningPlayer Player => player;
 
 
         private void Start()
         {
             Init();
+            // tex = GPUSkinningUtil.CreateTexture2D(anim.texture, anim);
         }
 
         void Init()
@@ -33,8 +36,7 @@ namespace Game.GPUSkinning
             res.texture = GPUSkinningUtil.CreateTexture2D(anim.texture, anim);
             res.texture.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor;
 
-
-            player = new GPUSkinningPlayer(gameObject, m_MeshRenderer, m_MeshFilter, res);
+            player = new GPUSkinningPlayer(gameObject, m_MeshRenderer, res);
             if (anim != null && anim.clips != null && anim.clips.Length > 0)
             {
                 player.Play(anim.clips[Mathf.Clamp(defaultPlayingClipIndex, 0, anim.clips.Length)].name);

@@ -8,7 +8,6 @@ namespace Game.GPUSkinning.Editor
 {
     public partial class GPUSkinningBaker
     {
-
         private void InitTextureInfo()
         {
             int numPixels = 0;
@@ -81,6 +80,7 @@ namespace Game.GPUSkinning.Editor
                 fileStream.Dispose();
             }
 
+            AssetDatabase.Refresh();
             var textureInfo = AssetDatabase.LoadAssetAtPath<TextAsset>(savedPath);
             animation.texture = textureInfo;
         }

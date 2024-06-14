@@ -99,3 +99,4 @@ MonoBehaviour:
   m_MeshRenderer: {fileID: 8423903806059441821}
   m_MeshFilter: {fileID: 8423903806059441794}
   anim: {fileID: 11400000, guid: 22bb1cbb6e3814643ab0a9615af8a716, type: 2}
+  defaultPlayingClipIndex: 0

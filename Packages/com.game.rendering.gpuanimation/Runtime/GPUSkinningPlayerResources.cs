@@ -51,15 +51,15 @@ namespace Game.GPUSkinning
             mpb.SetVector(ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation, new Vector4(frameIndex, playingClip.pixelSegmentation, 0, 0));
         }
 
-        public float CrossFadeBlendFactor(float crossFadeProgress, float crossFadeTime)
-        {
-            return Mathf.Clamp01(crossFadeProgress / crossFadeTime);
-        }
+        // public float CrossFadeBlendFactor(float crossFadeProgress, float crossFadeTime)
+        // {
+        //     return Mathf.Clamp01(crossFadeProgress / crossFadeTime);
+        // }
 
-        public bool IsCrossFadeBlending(GPUSkinningClip lastPlayedClip, float crossFadeTime, float crossFadeProgress)
-        {
-            return lastPlayedClip != null && crossFadeTime > 0 && crossFadeProgress <= crossFadeTime;
-        }
+        // public bool IsCrossFadeBlending(GPUSkinningClip lastPlayedClip, float crossFadeTime, float crossFadeProgress)
+        // {
+        //     return lastPlayedClip != null && crossFadeTime > 0 && crossFadeProgress <= crossFadeTime;
+        // }
 
     }
 }

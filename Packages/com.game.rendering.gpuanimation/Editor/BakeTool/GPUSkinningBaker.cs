@@ -31,21 +31,20 @@ namespace Game.GPUSkinning.Editor
 
         public void Bake()
         {
-            //获取每个动作每一帧的数据
-
             var animator = target.GetComponent<Animator>();
 
             var clips = animator.runtimeAnimatorController.animationClips;
             Debug.LogError($"clips.length:{clips.Length}");
 
-
             EditorCoroutineUtility.StartCoroutineOwnerless(BakeAllClip(clips));
 
-
-
-            CreateTextureMatrix(savePath);
-            EditorUtility.SetDirty(animation);
-            AssetDatabase.SaveAssetIfDirty(animation);
+            //材质球必须开启Instance
+            if (animation.material != null)
+            {
+                animation.material.enableInstancing = true;
+                EditorUtility.SetDirty(animation.material);
+                AssetDatabase.SaveAssetIfDirty(animation.material);
+            }
         }
 
         private IEnumerator BakeAllClip(AnimationClip[] clips)
@@ -61,6 +60,10 @@ namespace Game.GPUSkinning.Editor
                 clipIndex++;
             }
             AnimationMode.StopAnimationMode();
+
+            CreateTextureMatrix(savePath);
+            EditorUtility.SetDirty(animation);
+            AssetDatabase.SaveAssetIfDirty(animation);
             Debug.LogError($"Bake Over------------------");
         }
 

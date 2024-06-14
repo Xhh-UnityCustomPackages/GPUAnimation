@@ -11,7 +11,6 @@ namespace Game.GPUSkinning
         private GameObject go = null;
         private Transform transform = null;
         private MeshRenderer meshRenderer = null;
-        private MeshFilter meshFilter = null;
         private MaterialPropertyBlock mpb = null;
         private GPUSkinningPlayerResources res = null;
 
@@ -35,13 +34,12 @@ namespace Game.GPUSkinning
         private GPUSkinningClip playingClip = null;
 
 
-        public GPUSkinningPlayer(GameObject target, MeshRenderer meshRenderer, MeshFilter meshFilter, GPUSkinningPlayerResources resources)
+        public GPUSkinningPlayer(GameObject target, MeshRenderer meshRenderer, GPUSkinningPlayerResources resources)
         {
             go = target;
             transform = target.transform;
             this.res = resources;
             this.meshRenderer = meshRenderer;
-            this.meshFilter = meshFilter;
 
 
             res.InitMaterial(meshRenderer.sharedMaterial);

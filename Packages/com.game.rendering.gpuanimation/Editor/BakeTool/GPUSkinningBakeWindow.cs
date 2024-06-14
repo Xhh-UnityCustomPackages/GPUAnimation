@@ -20,9 +20,10 @@ namespace Game.GPUSkinning.Editor
             window.Show();
         }
 
+        [OnValueChanged("OnTargetChanged")]
         public GameObject target;
 
-        [Space(40)]
+
         [BoxGroup]
         public Transform rootBoneTransform = null;
         [BoxGroup, InlineEditor]
@@ -30,10 +31,93 @@ namespace Game.GPUSkinning.Editor
 
 
         private GPUSkinningBaker m_Baker = new();
+        [ShowInInspector]
+        private string m_SavePath;
+
+
+        private static readonly Dictionary<string, System.Type> _cacheMaterialTypes = new();
+        private static readonly Dictionary<string, IMaterialProvider> _cacheMaterialInstance = new();
+        public static readonly List<System.Type> _cacheMaterialTypesList = new();
+
+        [OnInspectorInit]
+        void Init()
+        {
+            //得到全部的材质类型
+            InitMaterialProvider();
+        }
+
+        #region Material
+        void InitMaterialProvider()
+        {
+            _cacheMaterialTypes.Clear();
+            _cacheMaterialInstance.Clear();
+
+            var customTypes = GetAssignableTypes(typeof(IMaterialProvider));
+            for (int i = 0; i < customTypes.Count; i++)
+            {
+                System.Type type = customTypes[i];
+                if (_cacheMaterialTypes.ContainsKey(type.Name) == false)
+                {
+                    _cacheMaterialTypesList.Add(type);
+                    _cacheMaterialTypes.Add(type.Name, type);
+                }
+            }
+
+            var count = _cacheMaterialTypesList.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var type = _cacheMaterialTypesList[i];
+
+                var filterRule = GetFilterRuleInstance(type.Name);
+            }
+        }
+
+        public static List<System.Type> GetAssignableTypes(System.Type parentType)
+        {
+            TypeCache.TypeCollection collection = TypeCache.GetTypesDerivedFrom(parentType);
+            return collection.ToList();
+        }
+
+        public static IMaterialProvider GetFilterRuleInstance(string ruleName)
+        {
+            if (_cacheMaterialInstance.TryGetValue(ruleName, out IMaterialProvider instance))
+                return instance;
+
+            // 如果不存在创建类的实例
+            if (_cacheMaterialTypes.TryGetValue(ruleName, out System.Type type))
+            {
+                instance = (IMaterialProvider)System.Activator.CreateInstance(type);
+                _cacheMaterialInstance.Add(ruleName, instance);
+                return instance;
+            }
+            else
+            {
+                throw new System.Exception($"{nameof(IMaterialProvider)}类型无效：{ruleName}");
+            }
+        }
+        #endregion
+
+        void OnTargetChanged()
+        {
+            if (target == null)
+            {
+                rootBoneTransform = null;
+                return;
+            }
+
+            if (rootBoneTransform != null && !rootBoneTransform.IsChildOf(target.transform))
+            {
+                rootBoneTransform = target.transform.GetChild(0);
+            }
+            else if (rootBoneTransform == null)
+            {
+                rootBoneTransform = target.transform.GetChild(0);
+            }
+        }
 
 
         [Button]
-        void Init()
+        void Bake()
         {
             if (target == null) return;
 
@@ -54,6 +138,9 @@ namespace Game.GPUSkinning.Editor
 
             var savePath = CreateDirectory(assetPath);
             LoadAnimationData(savePath);
+            m_SavePath = savePath;
+
+            CreateMaterial();
 
             m_Baker.animation = animation;
             m_Baker.skinnedMeshRenderer = skinRenderer;
@@ -61,18 +148,30 @@ namespace Game.GPUSkinning.Editor
             m_Baker.target = target;
             m_Baker.savePath = savePath;
             m_Baker.Init();
-        }
-
-        [Button]
-        void Bake()
-        {
             m_Baker.Bake();
         }
 
-        [Button]
-        void ExitAnimationMode()
+        [ValueDropdown("GetMaterialProvider")]
+        public IMaterialProvider materialProvider;
+
+        public IEnumerable<IMaterialProvider> GetMaterialProvider()
         {
-            AnimationMode.StopAnimationMode();
+            return _cacheMaterialInstance.Values;
+        }
+
+
+        void CreateMaterial()
+        {
+            if (materialProvider == null)
+                return;
+
+            var material = materialProvider.GetMaterial();
+            var savePath = $"{m_SavePath}GPUSkinning_farmer.mat";
+            Debug.LogError($"{savePath}");
+            AssetDatabase.CreateAsset(material, savePath);
+            AssetDatabase.Refresh();
+
+            animation.material = AssetDatabase.LoadAssetAtPath<Material>(savePath);
         }
 
 
