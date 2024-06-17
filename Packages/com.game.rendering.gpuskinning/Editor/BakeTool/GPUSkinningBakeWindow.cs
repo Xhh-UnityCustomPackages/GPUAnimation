@@ -121,10 +121,15 @@ namespace GameWish.Game.Editor
         {
             if (target == null) return;
 
+            var animator = target.GetComponent<Animator>();
+            if (animator == null || animator.runtimeAnimatorController == null)
+            {
+                EditorUtility.DisplayDialog("提示", "请先添加Animator组件并设置Controller", "确定");
+                return;
+            }
+
             var skinRenderer = target.GetComponentInChildren<SkinnedMeshRenderer>();
             if (skinRenderer == null) return;
-            var animator = target.GetComponent<Animator>();
-            if (animator == null) return;
 
             string assetPath = null;
             if (PrefabUtility.IsAnyPrefabInstanceRoot(target))
@@ -150,6 +155,24 @@ namespace GameWish.Game.Editor
             m_Baker.Init();
             m_Baker.Bake();
         }
+
+
+
+        [Button]
+        void CreateGPUSkinningGO()
+        {
+            if (target == null) return;
+            if (animation == null || animation.clips == null || animation.clips.Length <= 0) return;
+
+            GameObject gpu = new GameObject($"{target.name}_GPUSkinning");
+            var player = gpu.AddComponent<GPUSkinningPlayerMono>();
+
+            SerializedObject so = new SerializedObject(player);
+            so.FindProperty("anim").objectReferenceValue = animation;
+            so.ApplyModifiedProperties();
+
+        }
+
 
         [ValueDropdown("GetMaterialProvider")]
         public IMaterialProvider materialProvider;
