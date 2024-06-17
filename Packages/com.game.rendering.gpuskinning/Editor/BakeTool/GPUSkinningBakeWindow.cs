@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using Unity.EditorCoroutines.Editor;
 
-namespace Game.GPUSkinning.Editor
+namespace GameWish.Game.Editor
 {
     public partial class GPUSkinningBakeWindow : OdinEditorWindow
     {

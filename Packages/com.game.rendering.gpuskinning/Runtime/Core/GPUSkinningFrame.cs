@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game.GPUSkinning
+namespace GameWish.Game
 {
     [System.Serializable]
     public class GPUSkinningFrame

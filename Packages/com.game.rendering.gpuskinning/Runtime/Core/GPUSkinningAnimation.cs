@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace Game.GPUSkinning
+namespace GameWish.Game
 {
     public class GPUSkinningAnimation : ScriptableObject
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 
-namespace Game.GPUSkinning.Editor
+namespace GameWish.Game.Editor
 {
     public class DemoMaterialProvider : IMaterialProvider
     {

@@ -1,12 +1,12 @@
 {
   "dependencies": {
-    "com.game.rendering.gpuanimation": {
-      "version": "file:com.game.rendering.gpuanimation",
+    "com.seikami.rendering.gpuskinning": {
+      "version": "file:com.game.rendering.gpuskinning",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.unity.render-pipelines.core": "12.1.0",
-        "com.unity.render-pipelines.universal": "12.1.0"
+        "com.unity.render-pipelines.core": "10.10.1",
+        "com.unity.render-pipelines.universal": "10.10.1"
       }
     },
     "com.unity.2d.sprite": {

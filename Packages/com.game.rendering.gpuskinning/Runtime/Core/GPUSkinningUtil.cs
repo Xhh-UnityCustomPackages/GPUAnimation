@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Security.Cryptography;
 
-namespace Game.GPUSkinning
+namespace GameWish.Game
 {
     public class GPUSkinningUtil
     {

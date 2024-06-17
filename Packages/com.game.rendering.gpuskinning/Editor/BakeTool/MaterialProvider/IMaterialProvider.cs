@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game.GPUSkinning.Editor
+namespace GameWish.Game.Editor
 {
     public interface IMaterialProvider
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 using System.IO;
 using UnityEditor;
 
-namespace Game.GPUSkinning.Editor
+namespace GameWish.Game.Editor
 {
     public partial class GPUSkinningBaker
     {

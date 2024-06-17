@@ -13079,6 +13079,7 @@ MonoBehaviour:
         e31: 0
         e32: 0
         e33: 1
+    events: []
   - name: idle2
     length: 1
     frameRate: 30
@@ -25595,6 +25596,7 @@ MonoBehaviour:
         e31: 0
         e32: 0
         e33: 1
+    events: []
   - name: pick
     length: 0.6666667
     frameRate: 30
@@ -33941,6 +33943,9 @@ MonoBehaviour:
         e31: 0
         e32: 0
         e33: 1
+    events:
+    - frameIndex: 8
+      eventId: 0
   - name: walk
     length: 0.6666667
     frameRate: 30
@@ -42287,6 +42292,7 @@ MonoBehaviour:
         e31: 0
         e32: 0
         e33: 1
+    events: []
   - name: walk2
     length: 0.6666667
     frameRate: 30
@@ -50633,6 +50639,7 @@ MonoBehaviour:
         e31: 0
         e32: 0
         e33: 1
+    events: []
   - name: down
     length: 0.8000001
     frameRate: 30
@@ -60647,6 +60654,7 @@ MonoBehaviour:
         e31: 0
         e32: 0
         e33: 1
+    events: []
   bounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 0, y: 0, z: 0}

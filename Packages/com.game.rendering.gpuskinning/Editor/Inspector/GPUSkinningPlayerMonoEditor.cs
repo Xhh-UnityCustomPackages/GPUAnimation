@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using Sirenix.OdinInspector.Editor;
 
-namespace Game.GPUSkinning.Editor
+namespace GameWish.Game.Editor
 {
     [CustomEditor(typeof(GPUSkinningPlayerMono))]
     public class GPUSkinningPlayerMonoEditor : OdinEditor
