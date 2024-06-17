@@ -78,11 +78,12 @@ namespace Game.GPUSkinning.Editor
 
         private IEnumerator BakeClipFrame(AnimationClip clip, GPUSkinningClip skinningClip, float rate)
         {
-            // 
-
             int totalFrameCount = skinningClip.totalFrameCount;
 
+
+
             Debug.LogError($"Bake Clip Frame:{clip.name}---{samplingFrameIndex} {totalFrameCount} {rate}");
+            BakeAnimEvent(clip, skinningClip);
             AnimationMode.BeginSampling();
             AnimationMode.SampleAnimationClip(target, clip, rate);
             AnimationMode.EndSampling();
@@ -94,6 +95,26 @@ namespace Game.GPUSkinning.Editor
             {
                 float animRate = clip.length / totalFrameCount * samplingFrameIndex;
                 yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClipFrame(clip, skinningClip, animRate));
+            }
+        }
+
+        void BakeAnimEvent(AnimationClip clip, GPUSkinningClip skinningClip)
+        {
+            var animEvents = clip.events;
+            if (animEvents.Length <= 0)
+            {
+                skinningClip.events = null;
+                return;
+            }
+
+            skinningClip.events = new GPUSkinningAnimEvent[animEvents.Length];
+            for (int i = 0; i < animEvents.Length; ++i)
+            {
+                var animEvent = animEvents[i];
+                GPUSkinningAnimEvent evt = new GPUSkinningAnimEvent();
+                evt.frameIndex = (int)(animEvent.time * clip.frameRate);
+                evt.eventId = animEvent.intParameter;
+                skinningClip.events[i] = evt;
             }
         }
 

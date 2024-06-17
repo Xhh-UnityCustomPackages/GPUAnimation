@@ -34,6 +34,9 @@ namespace Game.GPUSkinning
         private GPUSkinningClip playingClip = null;
 
 
+        public event OnAnimEvent onAnimEvent;
+
+
         public GPUSkinningPlayer(GameObject target, MeshRenderer meshRenderer, GPUSkinningPlayerResources resources)
         {
             go = target;
@@ -175,7 +178,31 @@ namespace Game.GPUSkinning
                 res.UpdatePlayingData(mpb, playingClip, frameIndex, frame);
                 meshRenderer.SetPropertyBlock(mpb);
             }
+
+
+            UpdateEvents(playingClip, frameIndex);
         }
+
+
+        private void UpdateEvents(GPUSkinningClip clip, int frameIndex)
+        {
+            if (clip == null || clip.events == null || clip.events.Length == 0)
+            {
+                return;
+            }
+
+            GPUSkinningAnimEvent[] events = clip.events;
+            int numEvents = events.Length;
+            for (int i = 0; i < numEvents; ++i)
+            {
+                if (events[i].frameIndex == frameIndex && onAnimEvent != null)
+                {
+                    onAnimEvent(this, events[i].eventId);
+                    break;
+                }
+            }
+        }
+
 
         public void Stop()
         {

@@ -20,6 +20,7 @@ namespace Game.GPUSkinning
 
         public GPUSkinningWrapMode wrapMode = GPUSkinningWrapMode.Once;
         public GPUSkinningFrame[] frames = null;
+        public GPUSkinningAnimEvent[] events = null;
 
 
 

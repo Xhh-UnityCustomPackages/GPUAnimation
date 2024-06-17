@@ -162,8 +162,8 @@ namespace Game.GPUSkinning.Editor
 
         void CreateMaterial()
         {
-            if (materialProvider == null)
-                return;
+            if (materialProvider == null) return;
+            if (animation.material != null) return;
 
             var material = materialProvider.GetMaterial();
             var savePath = $"{m_SavePath}GPUSkinning_farmer.mat";
