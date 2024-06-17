@@ -30,14 +30,14 @@ namespace GameWish.Game.Editor
         public GPUSkinningAnimation animation = null;
 
 
-        private GPUSkinningBaker m_Baker = new();
+        private GPUSkinningBaker m_Baker = new GPUSkinningBaker();
         [ShowInInspector]
         private string m_SavePath;
 
 
-        private static readonly Dictionary<string, System.Type> _cacheMaterialTypes = new();
-        private static readonly Dictionary<string, IMaterialProvider> _cacheMaterialInstance = new();
-        public static readonly List<System.Type> _cacheMaterialTypesList = new();
+        private static readonly Dictionary<string, System.Type> _cacheMaterialTypes = new Dictionary<string, System.Type>();
+        private static readonly Dictionary<string, IMaterialProvider> _cacheMaterialInstance = new Dictionary<string, IMaterialProvider>();
+        public static readonly List<System.Type> _cacheMaterialTypesList = new List<System.Type>();
 
         [OnInspectorInit]
         void Init()

@@ -29,7 +29,7 @@ namespace GameWish.Game
             if (m_MeshRenderer == null || m_MeshFilter == null)
                 return;
 
-            GPUSkinningPlayerResources res = new();
+            GPUSkinningPlayerResources res = new GPUSkinningPlayerResources();
             res.anim = anim;
             res.texture = GPUSkinningUtil.CreateTexture2D(anim.texture, anim);
             res.texture.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor;

@@ -6,7 +6,8 @@
       "source": "embedded",
       "dependencies": {
         "com.unity.render-pipelines.core": "10.10.1",
-        "com.unity.render-pipelines.universal": "10.10.1"
+        "com.unity.render-pipelines.universal": "10.10.1",
+        "com.unity.editorcoroutines": "1.0.0"
       }
     },
     "com.unity.2d.sprite": {
