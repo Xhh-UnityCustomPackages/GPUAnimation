@@ -44,6 +44,7 @@ namespace GameWish.Game.Editor
         {
             //得到全部的材质类型
             InitMaterialProvider();
+            materialProviderName = null;
         }
 
         #region Material
@@ -68,7 +69,7 @@ namespace GameWish.Game.Editor
             {
                 var type = _cacheMaterialTypesList[i];
 
-                var filterRule = GetFilterRuleInstance(type.Name);
+                var filterRule = GetMaterialProviderInstance(type.Name);
             }
         }
 
@@ -78,7 +79,7 @@ namespace GameWish.Game.Editor
             return collection.ToList();
         }
 
-        public static IMaterialProvider GetFilterRuleInstance(string ruleName)
+        public static IMaterialProvider GetMaterialProviderInstance(string ruleName)
         {
             if (_cacheMaterialInstance.TryGetValue(ruleName, out IMaterialProvider instance))
                 return instance;
@@ -174,20 +175,26 @@ namespace GameWish.Game.Editor
         }
 
 
-        [ValueDropdown("GetMaterialProvider")]
-        public IMaterialProvider materialProvider;
 
-        public IEnumerable<IMaterialProvider> GetMaterialProvider()
+        [ValueDropdown("GetMaterialProvider")]
+        public string materialProviderName;
+
+        public IEnumerable<string> GetMaterialProvider()
         {
-            return _cacheMaterialInstance.Values;
+            var result = new List<string>();
+            foreach (var item in _cacheMaterialInstance.Values)
+            {
+                result.Add(item.name);
+            }
+            return result;
         }
 
 
         void CreateMaterial()
         {
-            if (materialProvider == null) return;
+            if (string.IsNullOrEmpty(materialProviderName)) return;
             if (animation.material != null) return;
-
+            var materialProvider = GetMaterialProviderInstance(materialProviderName);
             var material = materialProvider.GetMaterial();
             var savePath = $"{m_SavePath}GPUSkinning_farmer.mat";
             Debug.LogError($"{savePath}");
