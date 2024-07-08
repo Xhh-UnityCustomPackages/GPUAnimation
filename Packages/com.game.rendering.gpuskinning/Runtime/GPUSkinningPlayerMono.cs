@@ -11,22 +11,22 @@ namespace GameWish.Game
     {
         [SerializeField, HideInInspector] MeshRenderer m_MeshRenderer;
         [SerializeField, HideInInspector] MeshFilter m_MeshFilter;
-        [SerializeField] GPUSkinningAnimation anim = null;
+        [SerializeField] protected GPUSkinningAnimation anim = null;
         [SerializeField, HideInInspector] private int defaultPlayingClipIndex = 0;
-        [SerializeField, Range(0f, 5f), OnValueChanged("OnSpeedChanged")] private float m_Speed = 1;
+        [SerializeField, Range(0f, 5f), OnValueChanged("OnSpeedChanged")] protected float m_Speed = 1;
 
-        private GPUSkinningPlayer player = null;
+        protected GPUSkinningPlayer player = null;
 
         public GPUSkinningPlayer Player => player;
         public GPUSkinningPlayer.OnAnimEvent onAnimEvent;
 
 
-        private void Start()
+        private void Awake()
         {
             Init();
         }
 
-        void Init()
+        protected virtual void Init()
         {
             if (m_MeshRenderer == null || m_MeshFilter == null)
                 return;
@@ -44,7 +44,7 @@ namespace GameWish.Game
             }
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             if (player == null)
                 return;

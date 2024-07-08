@@ -24,8 +24,7 @@ namespace GameWish.Game
         // private float timeDiff = 0;
 
 
-        public bool IsPlaying => m_IsPlaying;
-        public GPUSkinningWrapMode WrapMode => m_PlayingClip == null ? GPUSkinningWrapMode.Once : m_PlayingClip.wrapMode;
+
 
         // private GPUSkinningClip lastPlayedClip = null;
         private int m_LastPlayingFrameIndex = -1;
@@ -38,7 +37,9 @@ namespace GameWish.Game
 
 
         public event OnAnimEvent onAnimEvent;
-
+        public bool IsPlaying => m_IsPlaying;
+        public GPUSkinningWrapMode WrapMode => m_PlayingClip == null ? GPUSkinningWrapMode.Once : m_PlayingClip.wrapMode;
+        public GPUSkinningClip playingClip => m_PlayingClip;
 
         public GPUSkinningPlayer(GameObject target, MeshRenderer meshRenderer, GPUSkinningPlayerResources resources)
         {
