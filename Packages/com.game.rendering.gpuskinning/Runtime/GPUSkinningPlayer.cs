@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 namespace GameWish.Game
 {
     public class GPUSkinningPlayer
@@ -17,21 +18,23 @@ namespace GameWish.Game
 
         private bool m_IsPlaying = false;
         private float time = 0;
-        private float timeDiff = 0;
+        private float m_Speed = 1;
 
+        private System.Action m_EndAction = null;
+        // private float timeDiff = 0;
 
 
         public bool IsPlaying => m_IsPlaying;
-        public GPUSkinningWrapMode WrapMode => playingClip == null ? GPUSkinningWrapMode.Once : playingClip.wrapMode;
+        public GPUSkinningWrapMode WrapMode => m_PlayingClip == null ? GPUSkinningWrapMode.Once : m_PlayingClip.wrapMode;
 
         // private GPUSkinningClip lastPlayedClip = null;
-        private int lastPlayingFrameIndex = -1;
+        private int m_LastPlayingFrameIndex = -1;
         // private float lastPlayedTime = 0;
         // private float crossFadeProgress = 0;
         // private float crossFadeTime = -1;
-        private int rootMotionFrameIndex = -1;
-        private GPUSkinningClip lastPlayingClip = null;
-        private GPUSkinningClip playingClip = null;
+        // private int rootMotionFrameIndex = -1;
+        private GPUSkinningClip m_LastPlayingClip = null;
+        private GPUSkinningClip m_PlayingClip = null;
 
 
         public event OnAnimEvent onAnimEvent;
@@ -44,13 +47,13 @@ namespace GameWish.Game
             this.res = resources;
             this.meshRenderer = meshRenderer;
 
-
             res.InitMaterial(meshRenderer.sharedMaterial);
             mpb = new MaterialPropertyBlock();
         }
 
         public void Update(float timeDelta)
         {
+            timeDelta *= m_Speed;
             Update_Internal(timeDelta);
         }
 
@@ -59,13 +62,13 @@ namespace GameWish.Game
         {
             get
             {
-                if (playingClip == null)
+                if (m_PlayingClip == null)
                 {
                     return false;
                 }
                 else
                 {
-                    return GetFrameIndex() == ((int)(playingClip.length * playingClip.frameRate) - 1);
+                    return GetFrameIndex() == ((int)(m_PlayingClip.length * m_PlayingClip.frameRate) - 1);
                 }
             }
         }
@@ -91,13 +94,13 @@ namespace GameWish.Game
         private int GetFrameIndex()
         {
             float time = GetCurrentTime();
-            if (playingClip.length == time)
+            if (m_PlayingClip.length == time)
             {
-                return GetTheLastFrameIndex_WrapMode_Once(playingClip);
+                return GetTheLastFrameIndex_WrapMode_Once(m_PlayingClip);
             }
             else
             {
-                return GetFrameIndex_WrapMode_Loop(playingClip, time);
+                return GetFrameIndex_WrapMode_Loop(m_PlayingClip, time);
             }
         }
 
@@ -113,29 +116,36 @@ namespace GameWish.Game
 
         private void Update_Internal(float timeDelta)
         {
-            if (!m_IsPlaying || playingClip == null)
+            if (!m_IsPlaying || m_PlayingClip == null)
             {
                 return;
             }
 
-            if (playingClip.wrapMode == GPUSkinningWrapMode.Loop)
+            if (m_PlayingClip.wrapMode == GPUSkinningWrapMode.Loop)
             {
                 UpdateMaterial(timeDelta);
-            }
-            else if (playingClip.wrapMode == GPUSkinningWrapMode.Once)
-            {
-                if (time >= playingClip.length)
+                time += timeDelta;
+                if (time > m_PlayingClip.length)
                 {
-                    time = playingClip.length;
+                    time = 0;
+                    m_EndAction?.Invoke();
+                }
+            }
+            else if (m_PlayingClip.wrapMode == GPUSkinningWrapMode.Once)
+            {
+                if (time >= m_PlayingClip.length)
+                {
+                    time = m_PlayingClip.length;
                     UpdateMaterial(timeDelta);
                 }
                 else
                 {
                     UpdateMaterial(timeDelta);
                     time += timeDelta;
-                    if (time > playingClip.length)
+                    if (time > m_PlayingClip.length)
                     {
-                        time = playingClip.length;
+                        time = m_PlayingClip.length;
+                        m_EndAction?.Invoke();
                     }
                 }
             }
@@ -151,14 +161,15 @@ namespace GameWish.Game
         private void UpdateMaterial(float deltaTime)
         {
             int frameIndex = GetFrameIndex();
-            if (lastPlayingClip == playingClip && lastPlayingFrameIndex == frameIndex)
+
+            if (m_LastPlayingClip == m_PlayingClip && m_LastPlayingFrameIndex == frameIndex)
             {
                 res.Update(deltaTime);
                 return;
             }
 
-            lastPlayingClip = playingClip;
-            lastPlayingFrameIndex = frameIndex;
+            m_LastPlayingClip = m_PlayingClip;
+            m_LastPlayingFrameIndex = frameIndex;
 
             // float blend_crossFade = 1;
             // int frameIndex_crossFade = -1;
@@ -175,12 +186,12 @@ namespace GameWish.Game
             {
                 // Debug.LogError($"frameIndex:{frameIndex}");
                 res.Update(deltaTime);
-                res.UpdatePlayingData(mpb, playingClip, frameIndex);
+                res.UpdatePlayingData(mpb, m_PlayingClip, frameIndex);
                 meshRenderer.SetPropertyBlock(mpb);
             }
 
 
-            UpdateEvents(playingClip, frameIndex);
+            UpdateEvents(m_PlayingClip, frameIndex);
         }
 
 
@@ -211,14 +222,44 @@ namespace GameWish.Game
 
         public void Resume()
         {
-            if (playingClip != null)
+            if (m_PlayingClip != null)
             {
                 m_IsPlaying = true;
             }
         }
 
+        public void SetSpeed(float speed)
+        {
+            m_Speed = speed;
+        }
 
-        public void Play(string clipName)
+
+        public void Play(string clipName, System.Action endAction = null)
+        {
+            if (!IsAnimSupported(clipName))
+            {
+                return;
+            }
+
+            GPUSkinningClip[] clips = res.anim.clips;
+            int numClips = clips == null ? 0 : clips.Length;
+            for (int i = 0; i < numClips; ++i)
+            {
+                if (clips[i].name == clipName)
+                {
+                    if (m_PlayingClip != clips[i] ||
+                        (m_PlayingClip != null && m_PlayingClip.wrapMode == GPUSkinningWrapMode.Once && IsTimeAtTheEndOfLoop) ||
+                        (m_PlayingClip != null && !m_IsPlaying))
+                    {
+                        m_EndAction = endAction;
+                        SetNewPlayingClip(clips[i]);
+                    }
+                    return;
+                }
+            }
+        }
+
+        public bool IsAnimSupported(string clipName)
         {
             GPUSkinningClip[] clips = res.anim.clips;
             int numClips = clips == null ? 0 : clips.Length;
@@ -226,15 +267,10 @@ namespace GameWish.Game
             {
                 if (clips[i].name == clipName)
                 {
-                    if (playingClip != clips[i] ||
-                        (playingClip != null && playingClip.wrapMode == GPUSkinningWrapMode.Once && IsTimeAtTheEndOfLoop) ||
-                        (playingClip != null && !m_IsPlaying))
-                    {
-                        SetNewPlayingClip(clips[i]);
-                    }
-                    return;
+                    return true;
                 }
             }
+            return false;
         }
 
         public void CrossFade(string clipName, float fadeLength)
@@ -248,10 +284,10 @@ namespace GameWish.Game
             // lastPlayedTime = GetCurrentTime();
 
             m_IsPlaying = true;
-            playingClip = clip;
-            rootMotionFrameIndex = -1;
+            m_PlayingClip = clip;
+            // rootMotionFrameIndex = -1;
             time = 0;
-            timeDiff = Random.Range(0, playingClip.length);
+            // timeDiff = Random.Range(0, playingClip.length);
         }
 
     }

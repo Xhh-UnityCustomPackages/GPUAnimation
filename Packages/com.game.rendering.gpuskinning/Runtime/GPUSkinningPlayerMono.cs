@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace GameWish.Game
@@ -12,6 +13,7 @@ namespace GameWish.Game
         [SerializeField, HideInInspector] MeshFilter m_MeshFilter;
         [SerializeField] GPUSkinningAnimation anim = null;
         [SerializeField, HideInInspector] private int defaultPlayingClipIndex = 0;
+        [SerializeField, Range(0f, 5f), OnValueChanged("OnSpeedChanged")] private float m_Speed = 1;
 
         private GPUSkinningPlayer player = null;
 
@@ -59,6 +61,12 @@ namespace GameWish.Game
         private void OnAnimEvent(GPUSkinningPlayer player, int eventId)
         {
             // Debug.LogError($"OnAnimEvent:{eventId}");
+        }
+
+
+        void OnSpeedChanged()
+        {
+            player.SetSpeed(m_Speed);
         }
 
 
