@@ -62,6 +62,13 @@ namespace GameWish.Game.Editor
             AnimationMode.StopAnimationMode();
 
             CreateTextureMatrix(savePath);
+
+            // Bake完成 清除Frame数据 Clear 
+            for (int i = 0; i < animation.clips.Length; i++)
+            {
+                animation.clips[i].frames = null;
+            }
+
             EditorUtility.SetDirty(animation);
             AssetDatabase.SaveAssetIfDirty(animation);
             Debug.LogError($"Bake Over------------------");
@@ -227,7 +234,6 @@ namespace GameWish.Game.Editor
             {
                 string boneHierarchyPath = GPUSkinningUtil.BoneHierarchyPath(bones, i);
                 string guid = GPUSkinningUtil.MD5(boneHierarchyPath);
-                bones[i].guid = guid;
             }
         }
 

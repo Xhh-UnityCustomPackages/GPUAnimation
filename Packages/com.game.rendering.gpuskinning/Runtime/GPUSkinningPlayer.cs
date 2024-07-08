@@ -170,12 +170,12 @@ namespace GameWish.Game
             //     blend_crossFade = res.CrossFadeBlendFactor(crossFadeProgress, crossFadeTime);
             // }
 
-            GPUSkinningFrame frame = playingClip.frames[frameIndex];
+            // GPUSkinningFrame frame = playingClip.frames[frameIndex];
             if (true)
             {
                 // Debug.LogError($"frameIndex:{frameIndex}");
                 res.Update(deltaTime);
-                res.UpdatePlayingData(mpb, playingClip, frameIndex, frame);
+                res.UpdatePlayingData(mpb, playingClip, frameIndex);
                 meshRenderer.SetPropertyBlock(mpb);
             }
 

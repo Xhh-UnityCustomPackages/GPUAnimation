@@ -196,7 +196,7 @@ namespace GameWish.Game.Editor
             if (animation.material != null) return;
             var materialProvider = GetMaterialProviderInstance(materialProviderName);
             var material = materialProvider.GetMaterial();
-            var savePath = $"{m_SavePath}GPUSkinning_farmer.mat";
+            var savePath = $"{m_SavePath}GPUSkinning_{target.name}.mat";
             Debug.LogError($"{savePath}");
             AssetDatabase.CreateAsset(material, savePath);
             AssetDatabase.Refresh();
@@ -225,7 +225,6 @@ namespace GameWish.Game.Editor
             animation = anim == null ? ScriptableObject.CreateInstance<GPUSkinningAnimation>() : anim;
             if (anim == null)
             {
-                animation.guid = System.Guid.NewGuid().ToString();
                 AssetDatabase.CreateAsset(animation, assetPath);
             }
         }

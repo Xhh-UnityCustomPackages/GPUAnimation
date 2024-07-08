@@ -10,8 +10,6 @@ namespace GameWish.Game
         [System.NonSerialized]
         public Transform transform = null;
 
-        public string guid = null;
-
 
         public string name = null;
         public Matrix4x4 bindpose;

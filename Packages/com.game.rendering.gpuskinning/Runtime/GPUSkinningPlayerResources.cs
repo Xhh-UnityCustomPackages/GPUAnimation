@@ -46,7 +46,7 @@ namespace GameWish.Game
             time += deltaTime;
         }
 
-        public void UpdatePlayingData(MaterialPropertyBlock mpb, GPUSkinningClip playingClip, int frameIndex, GPUSkinningFrame frame)
+        public void UpdatePlayingData(MaterialPropertyBlock mpb, GPUSkinningClip playingClip, int frameIndex)
         {
             mpb.SetVector(ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation, new Vector4(frameIndex, playingClip.pixelSegmentation, 0, 0));
         }

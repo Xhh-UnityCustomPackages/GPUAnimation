@@ -7,7 +7,7 @@ namespace GameWish.Game.Editor
 {
     public class DemoMaterialProvider : IMaterialProvider
     {
-        public string name => "DemoMaterial";
+        public string name => this.GetType().Name;
 
         public Material GetMaterial()
         {

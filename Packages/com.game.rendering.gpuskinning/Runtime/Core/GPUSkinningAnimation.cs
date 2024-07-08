@@ -7,7 +7,6 @@ namespace GameWish.Game
 {
     public class GPUSkinningAnimation : ScriptableObject
     {
-        public string guid = null;
         public new string name = null;
         public GPUSkinningBone[] bones = null;
         public int rootBoneIndex = 0;
