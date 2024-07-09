@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Unity.EditorCoroutines.Editor;
+using UnityEditor.Animations;
 
 namespace GameWish.Game.Editor
 {
@@ -13,6 +14,7 @@ namespace GameWish.Game.Editor
         public GPUSkinningAnimation animation;
         public Transform rootBoneTransform = null;
         public GameObject target;
+        private List<AnimatorStateClip> stateClips = new List<AnimatorStateClip>();
 
         public string savePath;
 
@@ -31,12 +33,7 @@ namespace GameWish.Game.Editor
 
         public void Bake()
         {
-            var animator = target.GetComponent<Animator>();
-
-            var clips = animator.runtimeAnimatorController.animationClips;
-            Debug.LogError($"clips.length:{clips.Length}");
-
-            EditorCoroutineUtility.StartCoroutineOwnerless(BakeAllClip(clips));
+            EditorCoroutineUtility.StartCoroutineOwnerless(BakeAllClip(stateClips));
 
             //材质球必须开启Instance
             if (animation.material != null)
@@ -47,16 +44,17 @@ namespace GameWish.Game.Editor
             }
         }
 
-        private IEnumerator BakeAllClip(AnimationClip[] clips)
+        private IEnumerator BakeAllClip(List<AnimatorStateClip> stateClips)
         {
             Debug.LogError($"Bake Start------------");
             AnimationMode.StartAnimationMode();
-
+            Debug.LogError($"---{stateClips.Count}");
             int clipIndex = 0;
-            for (int i = 0; i < clips.Length; i++)
+            for (int i = 0; i < stateClips.Count; i++)
             {
-                var clip = clips[clipIndex];
-                yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClip(clip));
+                var stateClip = stateClips[clipIndex];
+                Debug.LogError($"Bake Clip:{stateClip.stateName}");
+                yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClip(stateClip));
                 clipIndex++;
             }
             AnimationMode.StopAnimationMode();
@@ -74,20 +72,18 @@ namespace GameWish.Game.Editor
             Debug.LogError($"Bake Over------------------");
         }
 
-        private IEnumerator BakeClip(AnimationClip clip)
+        private IEnumerator BakeClip(AnimatorStateClip stateClip)
         {
-            Debug.LogError($"Start Bake Clip:{clip.name}");
+            Debug.LogError($"Start Bake State:{stateClip.stateName}--{stateClip.clip.name}");
             samplingFrameIndex = 0;
 
-            var skinningClip = animation.GetGPUSkinningClip(clip.name);
-            yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClipFrame(clip, skinningClip, 0));
+            var skinningClip = animation.GetGPUSkinningClip(stateClip.stateName);
+            yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClipFrame(stateClip.clip, skinningClip, 0));
         }
 
         private IEnumerator BakeClipFrame(AnimationClip clip, GPUSkinningClip skinningClip, float rate)
         {
             int totalFrameCount = skinningClip.totalFrameCount;
-
-
 
             Debug.LogError($"Bake Clip Frame:{clip.name}---{samplingFrameIndex} {totalFrameCount} {rate}");
             BakeAnimEvent(clip, skinningClip);
@@ -159,34 +155,7 @@ namespace GameWish.Game.Editor
                 while (true);
             }
 
-
-            // if (samplingFrameIndex == 0)
-            // {
-            //     rootMotionPosition = bones[animation.rootBoneIndex].transform.localPosition;
-            //     rootMotionRotation = bones[animation.rootBoneIndex].transform.localRotation;
-            // }
-            // else
-            // {
-            //     Vector3 newPosition = bones[animation.rootBoneIndex].transform.localPosition;
-            //     Quaternion newRotation = bones[animation.rootBoneIndex].transform.localRotation;
-            //     Vector3 deltaPosition = newPosition - rootMotionPosition;
-            //     frame.rootMotionDeltaPositionQ = Quaternion.Inverse(Quaternion.Euler(target.transform.forward.normalized)) * Quaternion.Euler(deltaPosition.normalized);
-            //     frame.rootMotionDeltaPositionL = deltaPosition.magnitude;
-            //     frame.rootMotionDeltaRotation = Quaternion.Inverse(rootMotionRotation) * newRotation;
-            //     rootMotionPosition = newPosition;
-            //     rootMotionRotation = newRotation;
-
-            //     if (samplingFrameIndex == 1)
-            //     {
-            //         gpuSkinningClip.frames[0].rootMotionDeltaPositionQ = gpuSkinningClip.frames[1].rootMotionDeltaPositionQ;
-            //         gpuSkinningClip.frames[0].rootMotionDeltaPositionL = gpuSkinningClip.frames[1].rootMotionDeltaPositionL;
-            //         gpuSkinningClip.frames[0].rootMotionDeltaRotation = gpuSkinningClip.frames[1].rootMotionDeltaRotation;
-            //     }
-            // }
-
             ++samplingFrameIndex;
-
-
         }
 
         void InitBones()
@@ -241,16 +210,30 @@ namespace GameWish.Game.Editor
         private void InitClip()
         {
             var animator = target.GetComponent<Animator>();
-            var animationClips = animator.runtimeAnimatorController.animationClips;
-            if (animationClips.Length <= 0)
+            var ac = animator.runtimeAnimatorController as AnimatorController;
+
+            stateClips.Clear();
+            foreach (var layer in ac.layers)
+            {
+                var stateMachine = layer.stateMachine;
+                foreach (var state in stateMachine.states)
+                {
+                    AnimatorState animatorState = state.state;
+                    stateClips.Add(new AnimatorStateClip() { stateName = animatorState.name, clip = animatorState.motion as AnimationClip });
+                }
+            }
+
+
+            Debug.LogError($"stateClips.Count:{stateClips.Count}");
+            if (stateClips.Count <= 0)
                 return;
 
-            animation.clips = new GPUSkinningClip[animationClips.Length];
-            for (int i = 0; i < animationClips.Length; i++)
+            animation.clips = new GPUSkinningClip[stateClips.Count];
+            for (int i = 0; i < stateClips.Count; i++)
             {
-                var clip = animationClips[i];
+                var clip = stateClips[i].clip;
                 var gpuSkinningClip = new GPUSkinningClip();
-                gpuSkinningClip.name = clip.name;
+                gpuSkinningClip.name = stateClips[i].stateName;
                 gpuSkinningClip.length = clip.length;
                 gpuSkinningClip.frameRate = clip.frameRate;
                 gpuSkinningClip.wrapMode = clip.isLooping ? GPUSkinningWrapMode.Loop : GPUSkinningWrapMode.Once;
@@ -266,5 +249,12 @@ namespace GameWish.Game.Editor
             }
         }
 
+
+
+        internal class AnimatorStateClip
+        {
+            public string stateName;
+            public AnimationClip clip;
+        }
     }
 }
