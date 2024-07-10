@@ -79,8 +79,8 @@ namespace GameWish.Game
             if (m_MeshRenderer == null) m_MeshRenderer = GetComponent<MeshRenderer>();
             if (m_MeshFilter == null) m_MeshFilter = GetComponent<MeshFilter>();
 
-            m_MeshRenderer.sharedMaterial = anim.material;
-            m_MeshFilter.sharedMesh = anim.mesh;
+            if (anim.material != null) m_MeshRenderer.sharedMaterial = anim.material;
+            if (anim.mesh != null) m_MeshFilter.sharedMesh = anim.mesh;
         }
 #endif
 

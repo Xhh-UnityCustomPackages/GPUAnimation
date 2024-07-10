@@ -158,6 +158,20 @@ namespace GameWish.Game.Editor
             var skinRenderer = target.GetComponentInChildren<SkinnedMeshRenderer>();
             if (skinRenderer == null) return;
 
+            LoadOrCreateAnimation();
+            CreateMaterial();
+
+            m_Baker.animation = animation;
+            m_Baker.skinnedMeshRenderer = skinRenderer;
+            m_Baker.rootBoneTransform = rootBoneTransform;
+            m_Baker.target = target;
+            m_Baker.savePath = m_SavePath;
+            m_Baker.Init();
+            m_Baker.Bake();
+        }
+
+        void LoadOrCreateAnimation()
+        {
             if (animation == null)
             {
                 string assetPath = null;
@@ -178,16 +192,6 @@ namespace GameWish.Game.Editor
             {
                 RefeshSavePath();
             }
-
-            CreateMaterial();
-
-            m_Baker.animation = animation;
-            m_Baker.skinnedMeshRenderer = skinRenderer;
-            m_Baker.rootBoneTransform = rootBoneTransform;
-            m_Baker.target = target;
-            m_Baker.savePath = m_SavePath;
-            m_Baker.Init();
-            m_Baker.Bake();
         }
 
 
@@ -205,6 +209,22 @@ namespace GameWish.Game.Editor
             so.FindProperty("anim").objectReferenceValue = animation;
             so.ApplyModifiedProperties();
 
+        }
+
+
+        [Button]
+        void BakeMesh()
+        {
+            if (target == null) return;
+            var skinRenderer = target.GetComponentInChildren<SkinnedMeshRenderer>();
+            if (skinRenderer == null) return;
+            LoadOrCreateAnimation();
+
+            m_Baker.skinnedMeshRenderer = skinRenderer;
+            m_Baker.target = target;
+            m_Baker.savePath = m_SavePath;
+            m_Baker.rootBoneTransform = rootBoneTransform;
+            m_Baker.Init();
         }
 
 
