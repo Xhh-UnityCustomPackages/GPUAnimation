@@ -26,12 +26,12 @@ namespace GameWish.Game
 
 
 
-        // private GPUSkinningClip lastPlayedClip = null;
+        private GPUSkinningClip lastPlayedClip = null;
         private int m_LastPlayingFrameIndex = -1;
-        // private float lastPlayedTime = 0;
-        // private float crossFadeProgress = 0;
-        // private float crossFadeTime = -1;
-        // private int rootMotionFrameIndex = -1;
+        private float lastPlayedTime = 0;
+        private float crossFadeProgress = 0;
+        private float crossFadeTime = -1;
+        private int rootMotionFrameIndex = -1;
         private GPUSkinningClip m_LastPlayingClip = null;
         private GPUSkinningClip m_PlayingClip = null;
 
@@ -40,6 +40,8 @@ namespace GameWish.Game
         public bool IsPlaying => m_IsPlaying;
         public GPUSkinningWrapMode WrapMode => m_PlayingClip == null ? GPUSkinningWrapMode.Once : m_PlayingClip.wrapMode;
         public GPUSkinningClip playingClip => m_PlayingClip;
+        public MaterialPropertyBlock materialPropertyBlock => mpb;
+        public MeshRenderer MeshRenderer => meshRenderer;
 
         public GPUSkinningPlayer(GameObject target, MeshRenderer meshRenderer, GPUSkinningPlayerResources resources)
         {
@@ -105,6 +107,34 @@ namespace GameWish.Game
             }
         }
 
+        private int GetCrossFadeFrameIndex()
+        {
+            if (lastPlayedClip == null)
+            {
+                return 0;
+            }
+
+            if (lastPlayedClip.wrapMode == GPUSkinningWrapMode.Once)
+            {
+                if (lastPlayedTime >= lastPlayedClip.length)
+                {
+                    return GetTheLastFrameIndex_WrapMode_Once(lastPlayedClip);
+                }
+                else
+                {
+                    return GetFrameIndex_WrapMode_Loop(lastPlayedClip, lastPlayedTime);
+                }
+            }
+            else if (lastPlayedClip.wrapMode == GPUSkinningWrapMode.Loop)
+            {
+                return GetFrameIndex_WrapMode_Loop(lastPlayedClip, lastPlayedTime);
+            }
+            else
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
         private int GetTheLastFrameIndex_WrapMode_Once(GPUSkinningClip clip)
         {
             return (int)(clip.length * clip.frameRate) - 1;
@@ -155,8 +185,8 @@ namespace GameWish.Game
                 throw new System.NotImplementedException();
             }
 
-            // crossFadeProgress += timeDelta;
-            // lastPlayedTime += timeDelta;
+            crossFadeProgress += timeDelta;
+            lastPlayedTime += timeDelta;
         }
 
         private void UpdateMaterial(float deltaTime)
@@ -173,30 +203,39 @@ namespace GameWish.Game
             m_LastPlayingFrameIndex = frameIndex;
 
             // float blend_crossFade = 1;
-            // int frameIndex_crossFade = -1;
+            int frameIndex_crossFade = -1;
             // GPUSkinningFrame frame_crossFade = null;
-            // if (res.IsCrossFadeBlending(lastPlayedClip, crossFadeTime, crossFadeProgress))
-            // {
-            //     frameIndex_crossFade = GetCrossFadeFrameIndex();
-            //     frame_crossFade = lastPlayedClip.frames[frameIndex_crossFade];
-            //     blend_crossFade = res.CrossFadeBlendFactor(crossFadeProgress, crossFadeTime);
-            // }
+            if (res.IsCrossFadeBlending(lastPlayedClip, crossFadeTime, crossFadeProgress))
+            {
+                frameIndex_crossFade = GetCrossFadeFrameIndex();
+                // frame_crossFade = lastPlayedClip.frames[frameIndex_crossFade];
+                // blend_crossFade = res.CrossFadeBlendFactor(crossFadeProgress, crossFadeTime);
+            }
 
             // GPUSkinningFrame frame = playingClip.frames[frameIndex];
             if (true)
             {
                 // Debug.LogError($"frameIndex:{frameIndex}");
                 res.Update(deltaTime);
-                res.UpdatePlayingData(mpb, m_PlayingClip, frameIndex);
+                res.UpdatePlayingData(
+                    mpb, m_PlayingClip, frameIndex,
+                    lastPlayedClip, GetCrossFadeFrameIndex(), crossFadeTime, crossFadeProgress
+                    );
                 meshRenderer.SetPropertyBlock(mpb);
             }
 
-
-            UpdateEvents(m_PlayingClip, frameIndex);
+            // UpdateEvents(m_PlayingClip, frameIndex);
+            UpdateEvents(playingClip, frameIndex, lastPlayedClip == null || frameIndex_crossFade >= lastPlayedClip.totalFrameCount ? null : lastPlayedClip, frameIndex_crossFade);
         }
 
 
-        private void UpdateEvents(GPUSkinningClip clip, int frameIndex)
+        private void UpdateEvents(GPUSkinningClip playingClip, int playingFrameIndex, GPUSkinningClip corssFadeClip, int crossFadeFrameIndex)
+        {
+            UpdateClipEvent(playingClip, playingFrameIndex);
+            UpdateClipEvent(corssFadeClip, crossFadeFrameIndex);
+        }
+
+        private void UpdateClipEvent(GPUSkinningClip clip, int frameIndex)
         {
             if (clip == null || clip.events == null || clip.events.Length == 0)
             {
@@ -260,6 +299,39 @@ namespace GameWish.Game
             }
         }
 
+        public void CrossFade(string clipName, float fadeLength, System.Action endAction = null)
+        {
+            if (playingClip == null)
+            {
+                Play(clipName);
+            }
+            else
+            {
+                GPUSkinningClip[] clips = res.anim.clips;
+                int numClips = clips == null ? 0 : clips.Length;
+                for (int i = 0; i < numClips; ++i)
+                {
+                    if (clips[i].name == clipName)
+                    {
+                        if (playingClip != clips[i])
+                        {
+                            crossFadeProgress = 0;
+                            crossFadeTime = fadeLength;
+                            m_EndAction = endAction;
+                            SetNewPlayingClip(clips[i]);
+                            return;
+                        }
+                        if ((playingClip != null && playingClip.wrapMode == GPUSkinningWrapMode.Once && IsTimeAtTheEndOfLoop) ||
+                            (playingClip != null && !m_IsPlaying))
+                        {
+                            SetNewPlayingClip(clips[i]);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         public bool IsAnimSupported(string clipName)
         {
             GPUSkinningClip[] clips = res.anim.clips;
@@ -274,15 +346,10 @@ namespace GameWish.Game
             return false;
         }
 
-        public void CrossFade(string clipName, float fadeLength)
-        {
-
-        }
-
         private void SetNewPlayingClip(GPUSkinningClip clip)
         {
-            // lastPlayedClip = playingClip;
-            // lastPlayedTime = GetCurrentTime();
+            lastPlayedClip = playingClip;
+            lastPlayedTime = GetCurrentTime();
 
             m_IsPlaying = true;
             m_PlayingClip = clip;

@@ -26,12 +26,12 @@ namespace GameWish.Game.Editor
 
         [BoxGroup]
         public Transform rootBoneTransform = null;
-        [BoxGroup, InlineEditor, OnValueChanged("RefeshSavePath")]
+        [BoxGroup, InlineEditor]
         public GPUSkinningAnimation animation = null;
 
 
         private GPUSkinningBaker m_Baker = new GPUSkinningBaker();
-        [ShowInInspector, ReadOnly]
+        [ShowInInspector]
         private string m_SavePath;
 
 
@@ -114,32 +114,6 @@ namespace GameWish.Game.Editor
             {
                 rootBoneTransform = target.transform.GetChild(0);
             }
-
-            animation = null;
-
-            //尝试找到对应的GPU SO
-            var guids = AssetDatabase.FindAssets("t:GPUSkinningAnimation");
-            foreach (var guid in guids)
-            {
-                var assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                if (assetPath.Contains(GetAnimationName(target.name)))
-                {
-                    animation = AssetDatabase.LoadAssetAtPath<GPUSkinningAnimation>(assetPath);
-                    RefeshSavePath();
-                    break;
-                }
-            }
-        }
-
-        void RefeshSavePath()
-        {
-            if (animation == null)
-                return;
-
-            string assetPath = AssetDatabase.GetAssetPath(animation);
-            assetPath = Path.GetDirectoryName(assetPath);
-            assetPath += Path.DirectorySeparatorChar;
-            m_SavePath = assetPath;
         }
 
 
@@ -158,40 +132,29 @@ namespace GameWish.Game.Editor
             var skinRenderer = target.GetComponentInChildren<SkinnedMeshRenderer>();
             if (skinRenderer == null) return;
 
-            LoadOrCreateAnimation();
+            string assetPath = null;
+            if (PrefabUtility.IsAnyPrefabInstanceRoot(target))
+                assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(target);
+            else
+                assetPath = AssetDatabase.GetAssetPath(target);
+            //在当前target位置生成GPUAnimation文件夹
+            if (string.IsNullOrEmpty(assetPath))
+                return;
+
+
+            var savePath = CreateDirectory(assetPath);
+            LoadAnimationData(savePath);
+            m_SavePath = savePath;
+
             CreateMaterial();
 
             m_Baker.animation = animation;
             m_Baker.skinnedMeshRenderer = skinRenderer;
             m_Baker.rootBoneTransform = rootBoneTransform;
             m_Baker.target = target;
-            m_Baker.savePath = m_SavePath;
+            m_Baker.savePath = savePath;
             m_Baker.Init();
             m_Baker.Bake();
-        }
-
-        void LoadOrCreateAnimation()
-        {
-            if (animation == null)
-            {
-                string assetPath = null;
-                if (PrefabUtility.IsAnyPrefabInstanceRoot(target))
-                    assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(target);
-                else
-                    assetPath = AssetDatabase.GetAssetPath(target);
-                //在当前target位置生成GPUAnimation文件夹
-                if (string.IsNullOrEmpty(assetPath))
-                    return;
-
-
-                var savePath = CreateDirectory(assetPath);
-                LoadAnimationData(savePath);
-                m_SavePath = savePath;
-            }
-            else
-            {
-                RefeshSavePath();
-            }
         }
 
 
@@ -209,22 +172,6 @@ namespace GameWish.Game.Editor
             so.FindProperty("anim").objectReferenceValue = animation;
             so.ApplyModifiedProperties();
 
-        }
-
-
-        [Button]
-        void BakeMesh()
-        {
-            if (target == null) return;
-            var skinRenderer = target.GetComponentInChildren<SkinnedMeshRenderer>();
-            if (skinRenderer == null) return;
-            LoadOrCreateAnimation();
-
-            m_Baker.skinnedMeshRenderer = skinRenderer;
-            m_Baker.target = target;
-            m_Baker.savePath = m_SavePath;
-            m_Baker.rootBoneTransform = rootBoneTransform;
-            m_Baker.Init();
         }
 
 
@@ -273,18 +220,13 @@ namespace GameWish.Game.Editor
 
         void LoadAnimationData(string savePath)
         {
-            string assetPath = $"{savePath}{GetAnimationName(target.name)}";
+            string assetPath = $"{savePath}GPUSkinning_Animation_{target.name}.asset";
             var anim = AssetDatabase.LoadAssetAtPath<GPUSkinningAnimation>(assetPath);
             animation = anim == null ? ScriptableObject.CreateInstance<GPUSkinningAnimation>() : anim;
             if (anim == null)
             {
                 AssetDatabase.CreateAsset(animation, assetPath);
             }
-        }
-
-        string GetAnimationName(string name)
-        {
-            return $"GPUSkinning_Animation_{name}.asset";
         }
     }
 }

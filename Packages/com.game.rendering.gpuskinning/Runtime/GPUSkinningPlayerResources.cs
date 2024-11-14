@@ -46,20 +46,26 @@ namespace GameWish.Game
             time += deltaTime;
         }
 
-        public void UpdatePlayingData(MaterialPropertyBlock mpb, GPUSkinningClip playingClip, int frameIndex)
+        public void UpdatePlayingData(MaterialPropertyBlock mpb, GPUSkinningClip playingClip, int frameIndex, GPUSkinningClip lastPlayedClip, int frameIndex_crossFade, float crossFadeTime, float crossFadeProgress)
         {
             mpb.SetVector(ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation, new Vector4(frameIndex, playingClip.pixelSegmentation, 0, 0));
+
+            if (IsCrossFadeBlending(lastPlayedClip, crossFadeTime, crossFadeProgress))
+            {
+                mpb.SetVector(ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade,
+                    new Vector4(frameIndex_crossFade, lastPlayedClip.pixelSegmentation, CrossFadeBlendFactor(crossFadeProgress, crossFadeTime)));
+            }
         }
 
-        // public float CrossFadeBlendFactor(float crossFadeProgress, float crossFadeTime)
-        // {
-        //     return Mathf.Clamp01(crossFadeProgress / crossFadeTime);
-        // }
+        public float CrossFadeBlendFactor(float crossFadeProgress, float crossFadeTime)
+        {
+            return Mathf.Clamp01(crossFadeProgress / crossFadeTime);
+        }
 
-        // public bool IsCrossFadeBlending(GPUSkinningClip lastPlayedClip, float crossFadeTime, float crossFadeProgress)
-        // {
-        //     return lastPlayedClip != null && crossFadeTime > 0 && crossFadeProgress <= crossFadeTime;
-        // }
+        public bool IsCrossFadeBlending(GPUSkinningClip lastPlayedClip, float crossFadeTime, float crossFadeProgress)
+        {
+            return lastPlayedClip != null && crossFadeTime > 0 && crossFadeProgress <= crossFadeTime;
+        }
 
     }
 }

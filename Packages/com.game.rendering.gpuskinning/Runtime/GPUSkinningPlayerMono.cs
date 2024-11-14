@@ -33,6 +33,7 @@ namespace GameWish.Game
 
             GPUSkinningPlayerResources res = new GPUSkinningPlayerResources();
             res.anim = anim;
+            //修复内存泄漏
             res.texture = GPUSkinningUtil.CreateTexture2D(anim.texture, anim);
             res.texture.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor;
 
@@ -66,7 +67,7 @@ namespace GameWish.Game
 
         void OnSpeedChanged()
         {
-            player.SetSpeed(m_Speed);
+            player?.SetSpeed(m_Speed);
         }
 
 
