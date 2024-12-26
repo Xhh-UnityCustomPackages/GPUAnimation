@@ -19,7 +19,7 @@ namespace GameWish.Game
             if(!s_TextureCache.TryGetValue(textureRawData.name, out Texture2D texture))
             {
                 texture = new Texture2D(anim.textureWidth, anim.textureHeight, TextureFormat.RGBAHalf, false, true);
-                texture.name = "GPUSkinningTextureMatrix";
+                texture.name = textureRawData.name;
                 texture.filterMode = FilterMode.Point;
                 texture.LoadRawTextureData(textureRawData.bytes);
                 texture.Apply(false, true);
