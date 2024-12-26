@@ -12,7 +12,7 @@ namespace GameWish.Game.Editor
 {
     public partial class GPUSkinningBakeWindow : OdinEditorWindow
     {
-        [MenuItem("Tools/GPUSkinningBakeWindow")]
+        [MenuItem("Tools/GPUSkinning/GPUSkinningBakeWindow")]
         static void OpenWindow()
         {
             var window = GetWindow<GPUSkinningBakeWindow>();
@@ -44,7 +44,7 @@ namespace GameWish.Game.Editor
         {
             //得到全部的材质类型
             InitMaterialProvider();
-            materialProviderName = null;
+            materialProviderName = GetMaterialProvider().FirstOrDefault();
         }
 
         #region Material
