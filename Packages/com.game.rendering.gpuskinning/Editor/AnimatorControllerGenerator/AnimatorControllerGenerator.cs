@@ -22,11 +22,19 @@ namespace Game.Rendering.GPUSkinning.Editor
             window.Show();
         }
 
+
+        public bool overrideAC = false;
+
+        
+        [HideIf("overrideAC")]
         [OnValueChanged("OnTempleteChanged")]
         public AnimatorControllerTempleteSO templeteSO;
 
+        [ShowIf("overrideAC")]
+        public AnimatorController controller;
+        
         public AnimationControllerInfo controllerInfo;
-
+        
 
         void OnTempleteChanged()
         {
@@ -46,10 +54,26 @@ namespace Game.Rendering.GPUSkinning.Editor
             }
         }
 
-        [Button]
+        [Button,HorizontalGroup]
         void ResetFormTemplete()
         {
             OnTempleteChanged();
+        }
+
+        [Button, HorizontalGroup]
+        void ReadFromAC()
+        {
+            if(controller == null) return;
+
+            controllerInfo.name = controller.name;
+            controllerInfo.savePath = AssetDatabase.GetAssetPath(controller).Replace($"/{controllerInfo.fileName}","");
+            controllerInfo.m_Animations.Clear();
+            
+            AnimatorStateMachine rootStateMachine = controller.layers[0].stateMachine;
+            foreach (var state in rootStateMachine.states)
+            {
+                controllerInfo.m_Animations.Add(new AnimationInfo() { stateName = state.state.name,clip = state.state.motion as AnimationClip});
+            }
         }
 
         [Button]
@@ -80,8 +104,10 @@ namespace Game.Rendering.GPUSkinning.Editor
             [FolderPath]
             public string savePath = "Assets";
 
-            public string filePath => $"{savePath}/{name}.controller";
-
+            public string filePath => $"{savePath}/{fileName}";
+            public string fileName=> $"{name}.controller";
+            
+            
             [TableList]
             // [ListDrawerSettings(Expanded = false, HideAddButton = true, HideRemoveButton = true)]
             public List<AnimationInfo> m_Animations = new();
