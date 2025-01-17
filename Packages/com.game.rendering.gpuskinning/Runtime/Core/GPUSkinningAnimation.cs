@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using System.IO;
 
@@ -45,7 +47,7 @@ namespace GameWish.Game
             return null;
         }
 
-
+#if UNITY_EDITOR
         [Button]
         void CreateTexture()
         {
@@ -64,6 +66,7 @@ namespace GameWish.Game
             // byte[] bytes = texture2D.EncodeToPNG();
             AssetDatabase.CreateAsset(texture2D, savePath);
         }
+#endif
 
     }
 }
