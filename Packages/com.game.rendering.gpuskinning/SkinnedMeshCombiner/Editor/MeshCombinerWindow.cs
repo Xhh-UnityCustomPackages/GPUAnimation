@@ -56,7 +56,7 @@ namespace JLChnToZ.EditorExtensions.SkinnedMeshCombiner {
         bool autoCleanup = true;
         Renderer destination;
 
-        [MenuItem("Tools/GPUSkinning/Skinned Mesh Combiner")]
+        [MenuItem("Tools/GPUSkinning/蒙皮网格合并 (Skinned Mesh Combiner)")]
         public static void ShowWindow() => GetWindow<MeshCombinerWindow>("Skinned Mesh Combiner").Show(true);
 
         protected virtual void OnEnable() {

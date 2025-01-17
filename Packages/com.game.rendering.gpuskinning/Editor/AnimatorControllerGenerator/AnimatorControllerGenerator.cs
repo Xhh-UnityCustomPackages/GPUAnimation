@@ -14,7 +14,7 @@ namespace Game.Rendering.GPUSkinning.Editor
     public class AnimatorControllerGenerator : OdinEditorWindow
     {
 
-        [MenuItem("Tools/GPUSkinning/AnimatorControllerGenerator")]
+        [MenuItem("Tools/GPUSkinning/生成AnimatorController (AnimatorControllerGenerator)")]
         static void OpenWindow()
         {
             var window = GetWindow<AnimatorControllerGenerator>();
