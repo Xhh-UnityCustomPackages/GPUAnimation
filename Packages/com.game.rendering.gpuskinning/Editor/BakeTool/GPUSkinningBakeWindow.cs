@@ -163,7 +163,7 @@ namespace GameWish.Game.Editor
             if (animation == null || animation.clips == null || animation.clips.Length <= 0) return;
 
             GameObject gpu = new GameObject($"{target.name}_GPUSkinning");
-            var player = gpu.AddComponent<GPUSkinningPlayerMono>();
+            var player = gpu.AddComponent<RendererRequire>();
 
             SerializedObject so = new SerializedObject(player);
             so.FindProperty("anim").objectReferenceValue = animation;

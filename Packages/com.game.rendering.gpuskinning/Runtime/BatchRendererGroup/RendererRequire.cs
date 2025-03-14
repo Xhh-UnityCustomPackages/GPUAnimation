@@ -41,7 +41,7 @@ namespace GameWish.Game
 
             anim = animSetting.animation;
 
-            player = new GPUSkinningPlayer(new GPUSkinningPlayerResources(anim));
+            player = new GPUSkinningPlayer(anim);
             m_BRGContainer = GPUSkinningSystem.S.RegisterPlayer(player, m_AnimSettingID);
             // player.onAnimEvent += OnAnimEvent;
             if (anim != null && anim.clips != null && anim.clips.Length > 0)
@@ -58,6 +58,7 @@ namespace GameWish.Game
             GPUSkinningSystem.S.UnregisterPlayer(player, m_AnimSettingID);
             player = null;
         }
+        
 
         void UpdateRendererItem()
         {

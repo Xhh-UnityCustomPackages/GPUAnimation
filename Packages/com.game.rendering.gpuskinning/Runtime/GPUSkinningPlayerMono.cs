@@ -26,7 +26,7 @@ namespace GameWish.Game
         public GPUSkinningPlayer.OnAnimEvent onAnimEvent;
 
 
-        private void Awake()
+        private void OnEnable()
         {
             Init();
         }
@@ -36,14 +36,17 @@ namespace GameWish.Game
             if (m_MeshRenderer == null || m_MeshFilter == null)
                 return;
 
-            GPUSkinningPlayerResources res = new GPUSkinningPlayerResources(anim);
-
-            player = new GPUSkinningPlayerWithRenderer(m_MeshRenderer, res);
+            player = new GPUSkinningPlayerWithRenderer(m_MeshRenderer, anim);
             player.onAnimEvent += OnAnimEvent;
             if (anim != null && anim.clips != null && anim.clips.Length > 0)
             {
                 player.Play(anim.clips[Mathf.Clamp(defaultPlayingClipIndex, 0, anim.clips.Length)].name);
             }
+        }
+
+        private void OnDestroy()
+        {
+            player = null;
         }
 
         protected virtual void Update()

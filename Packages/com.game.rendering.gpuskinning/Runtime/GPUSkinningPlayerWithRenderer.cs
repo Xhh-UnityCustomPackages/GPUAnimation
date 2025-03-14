@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GameWish.Game
@@ -13,7 +14,7 @@ namespace GameWish.Game
         public MeshRenderer MeshRenderer => meshRenderer;
 
 
-        public GPUSkinningPlayerWithRenderer(MeshRenderer meshRenderer, GPUSkinningPlayerResources resources) : base(resources)
+        public GPUSkinningPlayerWithRenderer(MeshRenderer meshRenderer, GPUSkinningAnimation anim) : base(anim)
         {
             this.meshRenderer = meshRenderer;
             mpb = new MaterialPropertyBlock();
@@ -35,7 +36,7 @@ namespace GameWish.Game
             // float blend_crossFade = 1;
             int frameIndex_crossFade = -1;
             // GPUSkinningFrame frame_crossFade = null;
-            if (res.IsCrossFadeBlending(m_LastPlayedClip, m_AnimUpdateData.crossFadeTime, m_AnimUpdateData.crossFadeProgress))
+            if (GPUSkinningPlayerResources.IsCrossFadeBlending(m_LastPlayedClip, m_AnimUpdateData.crossFadeTime, m_AnimUpdateData.crossFadeProgress))
             {
                 frameIndex_crossFade = GetCrossFadeFrameIndex();
                 // frame_crossFade = lastPlayedClip.frames[frameIndex_crossFade];
@@ -45,12 +46,18 @@ namespace GameWish.Game
             // GPUSkinningFrame frame = playingClip.frames[frameIndex];
             if (true)
             {
-                res.UpdatePlayingData(
+                GPUSkinningPlayerResources.UpdatePlayingData(
                     m_PlayingClip, frameIndex,
-                    m_LastPlayedClip, GetCrossFadeFrameIndex(), m_AnimUpdateData.crossFadeTime, m_AnimUpdateData.crossFadeProgress
+                    m_LastPlayedClip, GetCrossFadeFrameIndex(), m_AnimUpdateData.crossFadeTime, m_AnimUpdateData.crossFadeProgress,
+                    out float4 GPUSkinning_FrameIndex_PixelSegmentation,
+                    out float4 GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade
                 );
-                mpb.SetVector(GPUSkinningPlayerResources.ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation, res.GPUSkinning_FrameIndex_PixelSegmentation);
-                mpb.SetVector(GPUSkinningPlayerResources.ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade, res.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade);
+
+                m_AnimUpdateData.GPUSkinning_FrameIndex_PixelSegmentation = GPUSkinning_FrameIndex_PixelSegmentation;
+                m_AnimUpdateData.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade = GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade;
+
+                mpb.SetVector(GPUSkinningPlayerResources.ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation, m_AnimUpdateData.GPUSkinning_FrameIndex_PixelSegmentation);
+                mpb.SetVector(GPUSkinningPlayerResources.ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade, m_AnimUpdateData.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade);
                 meshRenderer.SetPropertyBlock(mpb);
             }
 

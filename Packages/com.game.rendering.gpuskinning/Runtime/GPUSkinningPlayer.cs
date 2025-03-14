@@ -11,7 +11,7 @@ namespace GameWish.Game
     {
         public delegate void OnAnimEvent(GPUSkinningPlayer player, int eventId);
 
-        protected GPUSkinningPlayerResources res = null;
+        protected GPUSkinningAnimation m_Anim = null;
 
         public float speed { get; set; } = 1;
 
@@ -31,9 +31,9 @@ namespace GameWish.Game
         public bool UseJob { get; set; } = false;
         public bool UseEvent { get; set; } = false;
 
-        public GPUSkinningPlayer(GPUSkinningPlayerResources resources)
+        public GPUSkinningPlayer(GPUSkinningAnimation anim)
         {
-            res = resources;
+            m_Anim = anim;
             m_AnimUpdateData.wrapMode = GPUSkinningWrapMode.Once;
         }
 
@@ -216,7 +216,7 @@ namespace GameWish.Game
             m_AnimUpdateData.crossFadeFrameIndex = -1;
             // GPUSkinningFrame frame_crossFade = null;
             int frameIndex_crossFade = GetCrossFadeFrameIndex();
-            if (res.IsCrossFadeBlending(m_LastPlayedClip, m_AnimUpdateData.crossFadeTime, m_AnimUpdateData.crossFadeProgress))
+            if (GPUSkinningPlayerResources.IsCrossFadeBlending(m_LastPlayedClip, m_AnimUpdateData.crossFadeTime, m_AnimUpdateData.crossFadeProgress))
             {
                 m_AnimUpdateData.crossFadeFrameIndex = frameIndex_crossFade;
                 // 这里可以缓存计算结果，避免在UpdateEvents中再次计算
@@ -225,11 +225,15 @@ namespace GameWish.Game
             // GPUSkinningFrame frame = playingClip.frames[frameIndex];
             if (true)
             {
-                // Debug.LogError($"frameIndex:{frameIndex}");
-                res.UpdatePlayingData(
+                GPUSkinningPlayerResources.UpdatePlayingData(
                     m_PlayingClip, frameIndex,
-                    m_LastPlayedClip, frameIndex_crossFade, m_AnimUpdateData.crossFadeTime, m_AnimUpdateData.crossFadeProgress
+                    m_LastPlayedClip, GetCrossFadeFrameIndex(), m_AnimUpdateData.crossFadeTime, m_AnimUpdateData.crossFadeProgress,
+                    out float4 GPUSkinning_FrameIndex_PixelSegmentation,
+                    out float4 GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade
                 );
+
+                m_AnimUpdateData.GPUSkinning_FrameIndex_PixelSegmentation = GPUSkinning_FrameIndex_PixelSegmentation;
+                m_AnimUpdateData.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade = GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade;
             }
 
             // 优化：只在需要时计算crossFadeFrameIndex
@@ -333,7 +337,7 @@ namespace GameWish.Game
 
         public GPUSkinningClip FindClipByName(string clipName)
         {
-            GPUSkinningClip[] clips = res.anim.clips;
+            GPUSkinningClip[] clips = m_Anim.clips;
             int numClips = clips == null ? 0 : clips.Length;
             for (int i = 0; i < numClips; ++i)
             {
