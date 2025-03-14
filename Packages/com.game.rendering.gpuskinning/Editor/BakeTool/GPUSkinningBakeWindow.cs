@@ -44,7 +44,7 @@ namespace GameWish.Game.Editor
         {
             //得到全部的材质类型
             InitMaterialProvider();
-            materialProviderName = GetMaterialProvider().FirstOrDefault();
+            materialProviderName = null;
         }
 
         #region Material

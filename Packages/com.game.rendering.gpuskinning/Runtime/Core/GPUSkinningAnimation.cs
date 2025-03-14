@@ -27,8 +27,6 @@ namespace GameWish.Game
         public Material material = null;
 
 
-
-
         public GPUSkinningClip GetGPUSkinningClip(string name)
         {
             if (clips == null || clips.Length == 0)
@@ -49,7 +47,7 @@ namespace GameWish.Game
 
 #if UNITY_EDITOR
         [Button]
-        void CreateTexture()
+        public void CreateTexture()
         {
             if (texture == null)
                 return;
@@ -60,13 +58,31 @@ namespace GameWish.Game
             var path = AssetDatabase.GetAssetPath(texture);
 
             var directory = Path.GetDirectoryName(path);
-            var savePath = directory + "/Texture.asset";
+            var savePath = directory + $"/{texture.name}.asset";
             savePath = savePath.Replace(Application.dataPath, "Assets/");
 
             // byte[] bytes = texture2D.EncodeToPNG();
             AssetDatabase.CreateAsset(texture2D, savePath);
+            AssetDatabase.Refresh();
+        }
+
+        [Button]
+        public void InitMaterial()
+        {
+            if (material == null)
+                return;
+            var path = AssetDatabase.GetAssetPath(texture);
+            var directory = Path.GetDirectoryName(path);
+            var savePath = directory + $"/{texture.name}.asset";
+            var textureAsset = AssetDatabase.LoadAssetAtPath<Texture>(savePath);
+
+            material.SetTexture(GPUSkinningPlayerResources.ShaderIDs.GPUSkinning_TextureMatrix, textureAsset);
+            material.SetVector(GPUSkinningPlayerResources.ShaderIDs.GPUSkinning_TextureSize_NumPixelsPerFrame,
+                new Vector4(textureWidth, textureHeight, bones.Length * 3 /*treat 3 pixels as a float3x4*/, 0));
+
+            EditorUtility.SetDirty(material);
+            AssetDatabase.SaveAssetIfDirty(material);
         }
 #endif
-
     }
 }

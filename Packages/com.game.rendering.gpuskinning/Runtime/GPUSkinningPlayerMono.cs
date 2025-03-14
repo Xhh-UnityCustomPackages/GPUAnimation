@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
@@ -7,15 +8,19 @@ namespace GameWish.Game
 {
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshFilter))]
+    [ExecuteAlways]
+    [Obsolete]//废弃的方法 不在支持了 现在也不走instance了 直接使用RednerRequire
     public class GPUSkinningPlayerMono : MonoBehaviour
     {
         [SerializeField, HideInInspector] MeshRenderer m_MeshRenderer;
         [SerializeField, HideInInspector] MeshFilter m_MeshFilter;
         [SerializeField] protected GPUSkinningAnimation anim = null;
         [SerializeField, HideInInspector] private int defaultPlayingClipIndex = 0;
-        [SerializeField, Range(0f, 5f), OnValueChanged("OnSpeedChanged")] protected float m_Speed = 1;
 
-        protected GPUSkinningPlayer player = null;
+        [SerializeField, Range(0f, 5f), OnValueChanged("OnSpeedChanged")]
+        protected float m_Speed = 1;
+
+        protected GPUSkinningPlayerWithRenderer player = null;
 
         public GPUSkinningPlayer Player => player;
         public GPUSkinningPlayer.OnAnimEvent onAnimEvent;
@@ -31,13 +36,9 @@ namespace GameWish.Game
             if (m_MeshRenderer == null || m_MeshFilter == null)
                 return;
 
-            GPUSkinningPlayerResources res = new GPUSkinningPlayerResources();
-            res.anim = anim;
-            //修复内存泄漏
-            res.texture = GPUSkinningUtil.CreateTexture2D(anim.texture, anim);
-            res.texture.hideFlags = HideFlags.DontSaveInBuild | HideFlags.DontSaveInEditor;
+            GPUSkinningPlayerResources res = new GPUSkinningPlayerResources(anim);
 
-            player = new GPUSkinningPlayer(gameObject, m_MeshRenderer, res);
+            player = new GPUSkinningPlayerWithRenderer(m_MeshRenderer, res);
             player.onAnimEvent += OnAnimEvent;
             if (anim != null && anim.clips != null && anim.clips.Length > 0)
             {
@@ -53,11 +54,6 @@ namespace GameWish.Game
             player.Update(Time.deltaTime);
         }
 
-
-        private void OnDestroy()
-        {
-
-        }
 
         private void OnAnimEvent(GPUSkinningPlayer player, int eventId)
         {
@@ -84,6 +80,5 @@ namespace GameWish.Game
             if (anim.mesh != null) m_MeshFilter.sharedMesh = anim.mesh;
         }
 #endif
-
     }
 }

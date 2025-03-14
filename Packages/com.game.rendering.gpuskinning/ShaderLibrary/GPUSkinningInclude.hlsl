@@ -1,31 +1,43 @@
 ﻿#ifndef GPUSKINNING_INCLUDE
 #define GPUSKINNING_INCLUDE
 
+//这两张贴图改为初始做在材质球上 减少数据传递
 uniform sampler2D _GPUSkinning_TextureMatrix;
-uniform float3 _GPUSkinning_TextureSize_NumPixelsPerFrame;
 
-UNITY_INSTANCING_BUFFER_START(GPUSkinningProperties0)
-UNITY_DEFINE_INSTANCED_PROP(float2, _GPUSkinning_FrameIndex_PixelSegmentation)
-#if !defined(ROOTON_BLENDOFF) && !defined(ROOTOFF_BLENDOFF)
-UNITY_DEFINE_INSTANCED_PROP(float3, _GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade)
-#endif
-UNITY_INSTANCING_BUFFER_END(GPUSkinningProperties0)
+//老的需要全部打开 后续在做兼容性
+// uniform float3 _GPUSkinning_TextureSize_NumPixelsPerFrame;
 
-#if defined(ROOTON_BLENDOFF) || defined(ROOTON_BLENDON_CROSSFADEROOTON) || defined(ROOTON_BLENDON_CROSSFADEROOTOFF)
-UNITY_INSTANCING_BUFFER_START(GPUSkinningProperties1)
-    UNITY_DEFINE_INSTANCED_PROP(float4x4, _GPUSkinning_RootMotion)
-UNITY_INSTANCING_BUFFER_END(GPUSkinningProperties1)
-#endif
+#ifndef UNITY_DOTS_INSTANCING_ENABLED
+// UNITY_INSTANCING_BUFFER_START(GPUSkinningProperties0)
+//     UNITY_DEFINE_INSTANCED_PROP(float2, _GPUSkinning_FrameIndex_PixelSegmentation)
+//     #if !defined(ROOTON_BLENDOFF) && !defined(ROOTOFF_BLENDOFF)
+// UNITY_DEFINE_INSTANCED_PROP(float3, _GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade)
+//
+// #define  _GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade      UNITY_ACCESS_INSTANCED_PROP(GPUSkinningProperties0, _GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade)
+//
+//     #endif
+//
+//     #define _GPUSkinning_FrameIndex_PixelSegmentation           UNITY_ACCESS_INSTANCED_PROP(GPUSkinningProperties0, _GPUSkinning_FrameIndex_PixelSegmentation)
+//
+// UNITY_INSTANCING_BUFFER_END(GPUSkinningProperties0)
+//
+// #if defined(ROOTON_BLENDOFF) || defined(ROOTON_BLENDON_CROSSFADEROOTON) || defined(ROOTON_BLENDON_CROSSFADEROOTOFF)
+// UNITY_INSTANCING_BUFFER_START(GPUSkinningProperties1)
+//     UNITY_DEFINE_INSTANCED_PROP(float4x4, _GPUSkinning_RootMotion)
+// UNITY_INSTANCING_BUFFER_END(GPUSkinningProperties1)
+// #endif
+//
+// #if defined(ROOTON_BLENDON_CROSSFADEROOTON) || defined(ROOTOFF_BLENDON_CROSSFADEROOTON)
+// UNITY_INSTANCING_BUFFER_START(GPUSkinningProperties2)
+//     UNITY_DEFINE_INSTANCED_PROP(float4x4, _GPUSkinning_RootMotion_CrossFade)
+// UNITY_INSTANCING_BUFFER_END(GPUSkinningProperties2)
+// #endif
 
-#if defined(ROOTON_BLENDON_CROSSFADEROOTON) || defined(ROOTOFF_BLENDON_CROSSFADEROOTON)
-UNITY_INSTANCING_BUFFER_START(GPUSkinningProperties2)
-    UNITY_DEFINE_INSTANCED_PROP(float4x4, _GPUSkinning_RootMotion_CrossFade)
-UNITY_INSTANCING_BUFFER_END(GPUSkinningProperties2)
 #endif
 
 inline float4 indexToUV(float index)
 {
-    int row = (int) (index / _GPUSkinning_TextureSize_NumPixelsPerFrame.x);
+    int row = (int)(index / _GPUSkinning_TextureSize_NumPixelsPerFrame.x);
     float col = index - row * _GPUSkinning_TextureSize_NumPixelsPerFrame.x;
     return float4(col / _GPUSkinning_TextureSize_NumPixelsPerFrame.x, row / _GPUSkinning_TextureSize_NumPixelsPerFrame.y, 0, 0);
 }
@@ -43,7 +55,7 @@ inline float4x4 getMatrix(int frameStartIndex, float boneIndex)
 
 inline float getFrameStartIndex()
 {
-    float2 frameIndex_segment = UNITY_ACCESS_INSTANCED_PROP(GPUSkinningProperties0, _GPUSkinning_FrameIndex_PixelSegmentation);
+    float2 frameIndex_segment = _GPUSkinning_FrameIndex_PixelSegmentation;
     float segment = frameIndex_segment.y;
     float frameIndex = frameIndex_segment.x;
     float frameStartIndex = segment + frameIndex * _GPUSkinning_TextureSize_NumPixelsPerFrame.z;
@@ -53,7 +65,7 @@ inline float getFrameStartIndex()
 #if !defined(ROOTON_BLENDOFF) && !defined(ROOTOFF_BLENDOFF)
 inline float getFrameStartIndex_crossFade()
 {
-    float3 frameIndex_segment = UNITY_ACCESS_INSTANCED_PROP(GPUSkinningProperties0, _GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade);
+    float3 frameIndex_segment = _GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade;
     float segment = frameIndex_segment.y;
     float frameIndex = frameIndex_segment.x;
     float frameStartIndex = segment + frameIndex * _GPUSkinning_TextureSize_NumPixelsPerFrame.z;
@@ -61,7 +73,7 @@ inline float getFrameStartIndex_crossFade()
 }
 #endif
 
-#define crossFadeBlend UNITY_ACCESS_INSTANCED_PROP(GPUSkinningProperties0, _GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade).z
+#define crossFadeBlend _GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade.z
 
 #define rootMotion UNITY_ACCESS_INSTANCED_PROP(GPUSkinningProperties1, _GPUSkinning_RootMotion)
 
@@ -138,70 +150,70 @@ inline float getFrameStartIndex_crossFade()
 
 inline float4 skin1(float4 vertex, float4 uv2, float4 uv3)
 {
-#if ROOTOFF_BLENDOFF
+    #if ROOTOFF_BLENDOFF
     rootOff_BlendOff(1);
-#endif
-#if ROOTON_BLENDOFF
+    #endif
+    #if ROOTON_BLENDOFF
     rootOn_BlendOff(1);
-#endif
-#if ROOTON_BLENDON_CROSSFADEROOTON
+    #endif
+    #if ROOTON_BLENDON_CROSSFADEROOTON
     rootOn_BlendOn_CrossFadeRootOn(1);
-#endif
-#if ROOTON_BLENDON_CROSSFADEROOTOFF
+    #endif
+    #if ROOTON_BLENDON_CROSSFADEROOTOFF
     rootOn_BlendOn_CrossFadeRootOff(1);
-#endif
-#if ROOTOFF_BLENDON_CROSSFADEROOTON
+    #endif
+    #if ROOTOFF_BLENDON_CROSSFADEROOTON
     rootOff_BlendOn_CrossFadeRootOn(1);
-#endif
-#if ROOTOFF_BLENDON_CROSSFADEROOTOFF
+    #endif
+    #if ROOTOFF_BLENDON_CROSSFADEROOTOFF
     rootOff_BlendOn_CrossFadeRootOff(1);
-#endif
+    #endif
     return vertex;
 }
 
 inline float4 skin2(float4 vertex, float4 uv2, float4 uv3)
 {
-#if ROOTOFF_BLENDOFF
+    #if ROOTOFF_BLENDOFF
     rootOff_BlendOff(2);
-#endif
-#if ROOTON_BLENDOFF
+    #endif
+    #if ROOTON_BLENDOFF
     rootOn_BlendOff(2);
-#endif
-#if ROOTON_BLENDON_CROSSFADEROOTON
+    #endif
+    #if ROOTON_BLENDON_CROSSFADEROOTON
     rootOn_BlendOn_CrossFadeRootOn(2);
-#endif
-#if ROOTON_BLENDON_CROSSFADEROOTOFF
+    #endif
+    #if ROOTON_BLENDON_CROSSFADEROOTOFF
     rootOn_BlendOn_CrossFadeRootOff(2);
-#endif
-#if ROOTOFF_BLENDON_CROSSFADEROOTON
+    #endif
+    #if ROOTOFF_BLENDON_CROSSFADEROOTON
     rootOff_BlendOn_CrossFadeRootOn(2);
-#endif
-#if ROOTOFF_BLENDON_CROSSFADEROOTOFF
+    #endif
+    #if ROOTOFF_BLENDON_CROSSFADEROOTOFF
     rootOff_BlendOn_CrossFadeRootOff(2);
-#endif
+    #endif
     return vertex;
 }
 
 inline float4 skin4(float4 vertex, float4 uv2, float4 uv3)
 {
-#if ROOTOFF_BLENDOFF
+    #if ROOTOFF_BLENDOFF
     rootOff_BlendOff(4);
-#endif
-#if ROOTON_BLENDOFF
+    #endif
+    #if ROOTON_BLENDOFF
     rootOn_BlendOff(4);
-#endif
-#if ROOTON_BLENDON_CROSSFADEROOTON
+    #endif
+    #if ROOTON_BLENDON_CROSSFADEROOTON
     rootOn_BlendOn_CrossFadeRootOn(4);
-#endif
-#if ROOTON_BLENDON_CROSSFADEROOTOFF
+    #endif
+    #if ROOTON_BLENDON_CROSSFADEROOTOFF
     rootOn_BlendOn_CrossFadeRootOff(4);
-#endif
-#if ROOTOFF_BLENDON_CROSSFADEROOTON
+    #endif
+    #if ROOTOFF_BLENDON_CROSSFADEROOTON
     rootOff_BlendOn_CrossFadeRootOn(4);
-#endif
-#if ROOTOFF_BLENDON_CROSSFADEROOTOFF
+    #endif
+    #if ROOTOFF_BLENDON_CROSSFADEROOTOFF
     rootOff_BlendOn_CrossFadeRootOff(4);
-#endif
+    #endif
     return vertex;
 }
 

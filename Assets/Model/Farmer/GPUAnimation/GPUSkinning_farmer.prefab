@@ -26,13 +26,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8423903806059441823}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8423903806059441794
 MeshFilter:
@@ -100,3 +100,4 @@ MonoBehaviour:
   m_MeshFilter: {fileID: 8423903806059441794}
   anim: {fileID: 11400000, guid: 22bb1cbb6e3814643ab0a9615af8a716, type: 2}
   defaultPlayingClipIndex: 0
+  m_Speed: 1

@@ -8,7 +8,7 @@ namespace GameWish.Game
     public class GPUSkinningUtil
     {
         private static Dictionary<string, Texture2D> s_TextureCache = new Dictionary<string, Texture2D>();
-        
+
         public static Texture2D CreateTexture2D(TextAsset textureRawData, GPUSkinningAnimation anim)
         {
             if (textureRawData == null || anim == null)
@@ -16,7 +16,7 @@ namespace GameWish.Game
                 return null;
             }
 
-            if(!s_TextureCache.TryGetValue(textureRawData.name, out Texture2D texture))
+            if (!s_TextureCache.TryGetValue(textureRawData.name, out Texture2D texture))
             {
                 texture = new Texture2D(anim.textureWidth, anim.textureHeight, TextureFormat.RGBAHalf, false, true);
                 texture.name = textureRawData.name;
@@ -59,6 +59,7 @@ namespace GameWish.Game
                 bone = bones[bone.parentBoneIndex];
                 path = bone.name + "/" + path;
             }
+
             return path;
         }
 
@@ -75,6 +76,7 @@ namespace GameWish.Game
             {
                 sTemp += bytHash[i].ToString("X").PadLeft(2, '0');
             }
+
             return sTemp.ToLower();
         }
     }

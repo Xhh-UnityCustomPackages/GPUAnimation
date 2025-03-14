@@ -7,53 +7,38 @@ namespace GameWish.Game
     public class GPUSkinningPlayerResources
     {
         public GPUSkinningAnimation anim = null;
-        public Texture2D texture = null;
 
-
-        private float time = 0;
-        public float Time
+        public GPUSkinningPlayerResources(GPUSkinningAnimation anim)
         {
-            get
-            {
-                return time;
-            }
-            set
-            {
-                time = value;
-            }
+            this.anim = anim;
         }
 
 
-        internal class ShaderIDs
+        public Vector4 GPUSkinning_FrameIndex_PixelSegmentation { get; private set; }
+        public Vector4 GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade { get; private set; }
+
+        public class ShaderIDs
         {
-            public static int GPUSkinning_TextureMatrix = Shader.PropertyToID("_GPUSkinning_TextureMatrix");
-            public static int GPUSkinning_TextureSize_NumPixelsPerFrame = Shader.PropertyToID("_GPUSkinning_TextureSize_NumPixelsPerFrame");
+            public static int GPUSkinning_TextureMatrix = Shader.PropertyToID("_GPUSkinning_TextureMatrix"); //提前转递到材质球
+            public static int GPUSkinning_TextureSize_NumPixelsPerFrame = Shader.PropertyToID("_GPUSkinning_TextureSize_NumPixelsPerFrame"); //提前转递到材质球
+
+
             public static int GPUSkinning_FrameIndex_PixelSegmentation = Shader.PropertyToID("_GPUSkinning_FrameIndex_PixelSegmentation");
-            public static int GPUSkinning_RootMotion = Shader.PropertyToID("_GPUSkinning_RootMotion");
+
+            // public static int GPUSkinning_RootMotion = Shader.PropertyToID("_GPUSkinning_RootMotion");
             public static int GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade = Shader.PropertyToID("_GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade");
-            public static int GPUSkinning_RootMotion_CrossFade = Shader.PropertyToID("_GPUSkinning_RootMotion_CrossFade");
+            // public static int GPUSkinning_RootMotion_CrossFade = Shader.PropertyToID("_GPUSkinning_RootMotion_CrossFade");
         }
 
-        public void InitMaterial(Material material)
+        public void UpdatePlayingData(GPUSkinningClip playingClip, int frameIndex, GPUSkinningClip lastPlayedClip, int frameIndex_crossFade, float crossFadeTime,
+            float crossFadeProgress)
         {
-            material.SetTexture(ShaderIDs.GPUSkinning_TextureMatrix, texture);
-            material.SetVector(ShaderIDs.GPUSkinning_TextureSize_NumPixelsPerFrame,
-                new Vector4(anim.textureWidth, anim.textureHeight, anim.bones.Length * 3/*treat 3 pixels as a float3x4*/, 0));
-        }
-
-        public void Update(float deltaTime)
-        {
-            time += deltaTime;
-        }
-
-        public void UpdatePlayingData(MaterialPropertyBlock mpb, GPUSkinningClip playingClip, int frameIndex, GPUSkinningClip lastPlayedClip, int frameIndex_crossFade, float crossFadeTime, float crossFadeProgress)
-        {
-            mpb.SetVector(ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation, new Vector4(frameIndex, playingClip.pixelSegmentation, 0, 0));
+            GPUSkinning_FrameIndex_PixelSegmentation = new Vector4(frameIndex, playingClip.pixelSegmentation, 0, 0);
 
             if (IsCrossFadeBlending(lastPlayedClip, crossFadeTime, crossFadeProgress))
             {
-                mpb.SetVector(ShaderIDs.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade,
-                    new Vector4(frameIndex_crossFade, lastPlayedClip.pixelSegmentation, CrossFadeBlendFactor(crossFadeProgress, crossFadeTime)));
+                GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade =
+                    new Vector4(frameIndex_crossFade, lastPlayedClip.pixelSegmentation, CrossFadeBlendFactor(crossFadeProgress, crossFadeTime));
             }
         }
 
@@ -66,6 +51,5 @@ namespace GameWish.Game
         {
             return lastPlayedClip != null && crossFadeTime > 0 && crossFadeProgress <= crossFadeTime;
         }
-
     }
 }
