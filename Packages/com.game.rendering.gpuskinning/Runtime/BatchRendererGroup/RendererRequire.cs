@@ -54,7 +54,7 @@ namespace GameWish.Game
         {
             m_RenderItem.position = transform.position;
             m_RenderItem.scale = transform.localScale.x;
-            m_RenderItem.color = new float4(1, 1, 1, 1);
+            m_RenderItem.color = new float4(color.r, color.g, color.b, color.a);
             m_RenderItem.gpuskinParam1 = player.animUpdateData.GPUSkinning_FrameIndex_PixelSegmentation;
             m_RenderItem.gpuskinParam2 = player.animUpdateData.GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade;
         }

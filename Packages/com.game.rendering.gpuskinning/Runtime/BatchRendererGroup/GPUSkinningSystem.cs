@@ -69,10 +69,6 @@ namespace GameWish.Game
                 batchRendererGroupContainer.Init(setting.animation.mesh, setting.animation.material, setting.maxCount, setting.shadowCastingMode);
                 m_BRGContainerMap.Add(animID, batchRendererGroupContainer);
             }
-            else
-            {
-                Debug.LogError($"animID:{animID} 不存在 GPUSkinningAnimationGroup 中");
-            }
 
             m_BRGContainerMap[animID].AddRef();
             return m_BRGContainerMap[animID];
