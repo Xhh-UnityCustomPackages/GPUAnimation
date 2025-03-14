@@ -17,7 +17,7 @@ namespace GameWish.Game
         public Vector4 GPUSkinning_FrameIndex_PixelSegmentation { get; private set; }
         public Vector4 GPUSkinning_FrameIndex_PixelSegmentation_Blend_CrossFade { get; private set; }
 
-        public class ShaderIDs
+        public static class ShaderIDs
         {
             public static int GPUSkinning_TextureMatrix = Shader.PropertyToID("_GPUSkinning_TextureMatrix"); //提前转递到材质球
             public static int GPUSkinning_TextureSize_NumPixelsPerFrame = Shader.PropertyToID("_GPUSkinning_TextureSize_NumPixelsPerFrame"); //提前转递到材质球

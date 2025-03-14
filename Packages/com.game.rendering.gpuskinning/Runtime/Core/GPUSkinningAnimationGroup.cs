@@ -10,7 +10,7 @@ namespace GameWish.Game
     [CreateAssetMenu(fileName = "GPUSkinningAnimationGroup", menuName = "Tools/GPU Skinning/GPUSkinningAnimationGroup")]
     public class GPUSkinningAnimationGroup : ScriptableObject
     {
-        public List<GPUSkinningAnimationSetting> animations = new();
+        [TableList] public List<GPUSkinningAnimationSetting> animations = new();
 
 
         public GPUSkinningAnimationSetting GetGPUSkinningAnimationSetting(int animID)

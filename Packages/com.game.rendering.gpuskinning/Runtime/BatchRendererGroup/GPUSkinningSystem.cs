@@ -12,6 +12,7 @@ using UnityEngine.Profiling;
 
 namespace GameWish.Game
 {
+    [ExecuteAlways]
     public class GPUSkinningSystem : MonoBehaviour
     {
         private static GPUSkinningSystem _Instance;
@@ -20,9 +21,20 @@ namespace GameWish.Game
         {
             get
             {
+                //先去场景里面找
                 if (_Instance == null)
                 {
+                    _Instance = FindObjectOfType<GPUSkinningSystem>();
+                }
+
+
+                if (_Instance == null)
+                {
+                    //先去场景里面找
+
                     var go = new GameObject("[GPUSkinningSystem]");
+
+
                     _Instance = go.AddComponent<GPUSkinningSystem>();
                     _Instance.m_AnimGroupSetting = Resources.Load<GPUSkinningAnimationGroup>("GPUSkinningAnimationGroup");
 
@@ -34,6 +46,11 @@ namespace GameWish.Game
                         AssetDatabase.Refresh();
                         _Instance.m_AnimGroupSetting = Resources.Load<GPUSkinningAnimationGroup>("GPUSkinningAnimationGroup");
                     }
+
+                    if (!Application.isPlaying)
+                    {
+                        go.hideFlags = HideFlags.HideAndDontSave;
+                    }
 #endif
 
                     if (_Instance.m_AnimGroupSetting == null)
@@ -41,7 +58,8 @@ namespace GameWish.Game
                         Debug.LogError("GPUSkinningAnimationGroup 不存在,Assets/Resources/GPUSkinningAnimationGroup.asset");
                     }
 
-                    DontDestroyOnLoad(go);
+                    if (Application.isPlaying)
+                        DontDestroyOnLoad(go);
                 }
 
                 return _Instance;
@@ -165,8 +183,9 @@ namespace GameWish.Game
             // 将更新后的数据复制回到Players
             if (m_Players.Count > 0 && m_NativeAnimUpdateData.IsCreated)
             {
-                for (int i = 0; i < m_Players.Count; i++)
+                for (int i = 0; i < m_NativeAnimUpdateData.Length; i++)
                 {
+                    if (i >= m_Players.Count) break;
                     var player = m_Players[i];
                     player.animUpdateData = m_NativeAnimUpdateData[i];
                 }
