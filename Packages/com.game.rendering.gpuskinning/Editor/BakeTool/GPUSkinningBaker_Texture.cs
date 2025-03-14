@@ -21,7 +21,7 @@ namespace GameWish.Game.Editor
 
                 GPUSkinningFrame[] frames = clip.frames;
                 int numFrames = frames.Length;
-                numPixels += animation.bones.Length * 3/*treat 3 pixels as a float3x4*/ * numFrames;
+                numPixels += animation.bones.Length * 3 /*treat 3 pixels as a float3x4*/ * numFrames;
             }
 
             CalculateTextureSize(numPixels, out animation.textureWidth, out animation.textureHeight);
@@ -40,7 +40,6 @@ namespace GameWish.Game.Editor
                 texHeight *= 2;
             }
         }
-
 
 
         private void CreateTextureMatrix(string savePath)
@@ -67,22 +66,33 @@ namespace GameWish.Game.Editor
                     }
                 }
             }
+
             texture.SetPixels(pixels);
+            texture.filterMode = FilterMode.Point;
             texture.Apply();
 
-            string savedPath = savePath + $"GPUSKinning_Texture_{target.name}.bytes";
-            using (FileStream fileStream = new FileStream(savedPath, FileMode.Create))
-            {
-                byte[] bytes = texture.GetRawTextureData();
-                fileStream.Write(bytes, 0, bytes.Length);
-                fileStream.Flush();
-                fileStream.Close();
-                fileStream.Dispose();
-            }
-
+            //直接保存为Texture2D
+            string savedPath = savePath + $"GPUSKinning_Texture_{target.name}.asset";
+            AssetDatabase.CreateAsset(texture, savedPath);
             AssetDatabase.Refresh();
-            var textureInfo = AssetDatabase.LoadAssetAtPath<TextAsset>(savedPath);
-            animation.texture = textureInfo;
+
+            var textureInfo = AssetDatabase.LoadAssetAtPath<Texture>(savedPath);
+            animation.textureAsset = textureInfo;
+
+
+            // string savedPath = savePath + $"GPUSKinning_Texture_{target.name}.bytes";
+            // using (FileStream fileStream = new FileStream(savedPath, FileMode.Create))
+            // {
+            //     byte[] bytes = texture.GetRawTextureData();
+            //     fileStream.Write(bytes, 0, bytes.Length);
+            //     fileStream.Flush();
+            //     fileStream.Close();
+            //     fileStream.Dispose();
+            // }
+            //
+            // AssetDatabase.Refresh();
+            // var textureInfo = AssetDatabase.LoadAssetAtPath<TextAsset>(savedPath);
+            // animation.texture = textureInfo;
         }
     }
 }

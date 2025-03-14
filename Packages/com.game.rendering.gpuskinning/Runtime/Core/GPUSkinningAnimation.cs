@@ -23,7 +23,8 @@ namespace GameWish.Game
 
 
         public Mesh mesh = null;
-        public TextAsset texture = null;
+        [HideInInspector] public TextAsset texture = null;
+        public Texture textureAsset = null;
         public Material material = null;
 
 
@@ -64,6 +65,11 @@ namespace GameWish.Game
             // byte[] bytes = texture2D.EncodeToPNG();
             AssetDatabase.CreateAsset(texture2D, savePath);
             AssetDatabase.Refresh();
+
+
+            textureAsset = AssetDatabase.LoadAssetAtPath<Texture>(savePath);
+            EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssetIfDirty(this);
         }
 
         [Button]
@@ -71,10 +77,7 @@ namespace GameWish.Game
         {
             if (material == null)
                 return;
-            var path = AssetDatabase.GetAssetPath(texture);
-            var directory = Path.GetDirectoryName(path);
-            var savePath = directory + $"/{texture.name}.asset";
-            var textureAsset = AssetDatabase.LoadAssetAtPath<Texture>(savePath);
+
 
             material.SetTexture(GPUSkinningPlayerResources.ShaderIDs.GPUSkinning_TextureMatrix, textureAsset);
             material.SetVector(GPUSkinningPlayerResources.ShaderIDs.GPUSkinning_TextureSize_NumPixelsPerFrame,

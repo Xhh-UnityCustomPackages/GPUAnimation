@@ -20,19 +20,15 @@ namespace GameWish.Game.Editor
             window.Show();
         }
 
-        [OnValueChanged("OnTargetChanged")]
-        public GameObject target;
+        [OnValueChanged("OnTargetChanged")] public GameObject target;
 
 
-        [BoxGroup]
-        public Transform rootBoneTransform = null;
-        [BoxGroup, InlineEditor]
-        public GPUSkinningAnimation animation = null;
+        [BoxGroup] public Transform rootBoneTransform = null;
+        [BoxGroup, InlineEditor] public GPUSkinningAnimation animation = null;
 
 
         private GPUSkinningBaker m_Baker = new GPUSkinningBaker();
-        [ShowInInspector]
-        private string m_SavePath;
+        [ShowInInspector] private string m_SavePath;
 
 
         private static readonly Dictionary<string, System.Type> _cacheMaterialTypes = new Dictionary<string, System.Type>();
@@ -44,10 +40,11 @@ namespace GameWish.Game.Editor
         {
             //得到全部的材质类型
             InitMaterialProvider();
-            materialProviderName = null;
+            materialProviderName = GetMaterialProvider().FirstOrDefault();
         }
 
         #region Material
+
         void InitMaterialProvider()
         {
             _cacheMaterialTypes.Clear();
@@ -96,6 +93,7 @@ namespace GameWish.Game.Editor
                 throw new System.Exception($"{nameof(IMaterialProvider)}类型无效：{ruleName}");
             }
         }
+
         #endregion
 
         void OnTargetChanged()
@@ -158,7 +156,6 @@ namespace GameWish.Game.Editor
         }
 
 
-
         [Button]
         void CreateGPUSkinningGO()
         {
@@ -171,13 +168,10 @@ namespace GameWish.Game.Editor
             SerializedObject so = new SerializedObject(player);
             so.FindProperty("anim").objectReferenceValue = animation;
             so.ApplyModifiedProperties();
-
         }
 
 
-
-        [ValueDropdown("GetMaterialProvider")]
-        public string materialProviderName;
+        [ValueDropdown("GetMaterialProvider")] public string materialProviderName;
 
         public IEnumerable<string> GetMaterialProvider()
         {
@@ -186,6 +180,7 @@ namespace GameWish.Game.Editor
             {
                 result.Add(item.name);
             }
+
             return result;
         }
 

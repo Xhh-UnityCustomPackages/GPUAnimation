@@ -9,7 +9,6 @@ namespace GameWish.Game.Editor
 {
     public partial class GPUSkinningBaker
     {
-
         public SkinnedMeshRenderer skinnedMeshRenderer;
         public GPUSkinningAnimation animation;
         public Transform rootBoneTransform = null;
@@ -57,6 +56,7 @@ namespace GameWish.Game.Editor
                 yield return EditorCoroutineUtility.StartCoroutineOwnerless(BakeClip(stateClip));
                 clipIndex++;
             }
+
             AnimationMode.StopAnimationMode();
 
             CreateTextureMatrix(savePath);
@@ -66,6 +66,8 @@ namespace GameWish.Game.Editor
             {
                 animation.clips[i].frames = null;
             }
+
+            animation.InitMaterial();
 
             EditorUtility.SetDirty(animation);
             AssetDatabase.SaveAssetIfDirty(animation);
@@ -122,8 +124,8 @@ namespace GameWish.Game.Editor
         }
 
 
-
         int samplingFrameIndex;
+
         // private Vector3 rootMotionPosition;
         // private Quaternion rootMotionRotation;
         // private GPUSkinningClip gpuSkinningClip = null;
@@ -151,8 +153,7 @@ namespace GameWish.Game.Editor
                     {
                         currentBone = bones[currentBone.parentBoneIndex];
                     }
-                }
-                while (true);
+                } while (true);
             }
 
             ++samplingFrameIndex;
@@ -245,10 +246,10 @@ namespace GameWish.Game.Editor
                     frame.matrices = new Matrix4x4[animation.bones.Length];
                     gpuSkinningClip.frames[f] = frame;
                 }
+
                 animation.clips[i] = gpuSkinningClip;
             }
         }
-
 
 
         internal class AnimatorStateClip
