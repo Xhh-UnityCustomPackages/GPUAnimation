@@ -24,7 +24,6 @@ namespace GameWish.Game
 
         protected BatchRendererGroupContainer m_BRGContainer;
         protected BatchRendererGroupContainer.RendererItem m_RenderItem;
-        protected int m_RendererID;
 
         protected GPUSkinningAnimation anim = null;
 
@@ -50,7 +49,7 @@ namespace GameWish.Game
             }
 
             UpdateRendererItem();
-            m_RendererID = m_BRGContainer.AddRenderItem(ref m_RenderItem);
+            m_BRGContainer.AddRenderItem(ref m_RenderItem);
         }
 
         private void OnDestroy()
@@ -58,9 +57,9 @@ namespace GameWish.Game
             GPUSkinningSystem.S.UnregisterPlayer(player, m_AnimSettingID);
             player = null;
         }
-        
 
-        void UpdateRendererItem()
+
+        protected virtual void UpdateRendererItem()
         {
             m_RenderItem.position = transform.position;
             m_RenderItem.scale = transform.localScale.x;
@@ -76,7 +75,7 @@ namespace GameWish.Game
                 return;
 
             UpdateRendererItem();
-            m_BRGContainer.UpdateRenderItem(m_RendererID, ref m_RenderItem);
+            m_BRGContainer.AddRenderItem(ref m_RenderItem);
         }
 
         void OnSpeedChanged()

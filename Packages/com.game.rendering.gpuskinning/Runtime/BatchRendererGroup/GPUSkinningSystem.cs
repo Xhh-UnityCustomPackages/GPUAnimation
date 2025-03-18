@@ -21,11 +21,16 @@ namespace GameWish.Game
         {
             get
             {
-                //先去场景里面找
-                if (_Instance == null)
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
                 {
-                    _Instance = FindObjectOfType<GPUSkinningSystem>();
+                    //先去场景里面找
+                    if (_Instance == null)
+                    {
+                        _Instance = FindObjectOfType<GPUSkinningSystem>();
+                    }
                 }
+#endif
 
 
                 if (_Instance == null)
@@ -168,16 +173,7 @@ namespace GameWish.Game
 
             // 保存 JobHandle 以便在 LateUpdate 中使用
             jobHandle = job.Schedule(m_Players.Count, 4);
-            Profiler.EndSample();
-        }
-
-
-        private void LateUpdate()
-        {
-            Profiler.BeginSample("GPUSkinningSystem.LateUpdate");
             jobHandle.Complete();
-
-
             //并行写入systembuffer
 
             // 将更新后的数据复制回到Players
@@ -193,13 +189,23 @@ namespace GameWish.Game
                 // 释放Native数组
                 m_NativeAnimUpdateData.Dispose();
             }
+            
+            Profiler.EndSample();
+            
+            
+        }
+
+
+        private void LateUpdate()
+        {
+            Profiler.BeginSample("GPUSkinningSystem.LateUpdate");
 
             foreach (var brg in m_BRGContainerMap.Values) brg.DoUpdateRenderItemJob();
             s_GPUSetData.Begin();
             foreach (var brg in m_BRGContainerMap.Values) brg.UploadGpuData();
             s_GPUSetData.End();
 
-            // foreach (var brg in m_BRGContainerMap.Values) brg.ClearInstnce();
+            foreach (var brg in m_BRGContainerMap.Values) brg.ClearInstnce();
 
 
             foreach (var player in m_Players)

@@ -282,7 +282,7 @@ namespace GameWish.Game
 
         public void SetSpeed(float speed)
         {
-            speed = speed;
+            this.speed = speed;
         }
 
 
@@ -310,7 +310,7 @@ namespace GameWish.Game
         {
             if (m_AnimUpdateData.IsNotSetPlaying())
             {
-                Play(clipName);
+                Play(clipName, endAction);
             }
             else
             {
@@ -366,6 +366,7 @@ namespace GameWish.Game
             {
                 m_AnimUpdateData.lastClipLength = 0;
                 m_AnimUpdateData.lastFrameRate = 0;
+                m_AnimUpdateData.lastWrapMode = GPUSkinningWrapMode.Once;
                 m_AnimUpdateData.lastPlayingClipPixelSegmentation = 0;
             }
 

@@ -276,11 +276,10 @@ public unsafe class BatchRendererGroupContainer
             m_sysmemBuffer[offset] = new float4(1, 0, 0, 0);
             m_sysmemBuffer[offset + 1] = new float4(1, 0, 0, 0);
             m_sysmemBuffer[offset + 2] = new float4(1, 0, 0, 0);
-
-            // update colors
-            m_sysmemBuffer[windowOffsetInFloat4 + m_maxInstancePerWindow * 3 * 2 + i] = item.color;
         }
 
+        // update colors
+        m_sysmemBuffer[windowOffsetInFloat4 + m_maxInstancePerWindow * 3 * 2 + i] = item.color;
 
         //GPUSkinning
         m_sysmemBuffer[windowOffsetInFloat4 + m_maxInstancePerWindow * (3 * 2 + 1) + i] = item.gpuskinParam1;
